@@ -4,18 +4,22 @@
     gap: 22px;
     padding: 24px clamp(14px, 4vw, 54px);
     align-items: start;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(0,196,106,.14), transparent 30%),
+        linear-gradient(180deg, #f7fcf9 0%, #eef8f2 100%);
+    min-height: 100vh;
 }
 .side-panel, .composer, .feed-card {
     border: 1px solid var(--line);
     background: rgba(255,255,255,.93);
     backdrop-filter: blur(14px);
     box-shadow: var(--shadow);
-    border-radius: 8px;
+    border-radius: 22px;
 }
 .side-panel { position: sticky; top: 90px; display: grid; gap: 8px; padding: 16px; }
-.side-panel a { padding: 10px; border-radius: 8px; transition: background .2s ease, transform .2s ease; }
+.side-panel a { padding: 12px; border-radius: 14px; transition: background .2s ease, transform .2s ease; color: var(--text); }
 .side-panel a:hover { background: var(--mint); transform: translateX(3px); }
-.profile-mini { display: grid; gap: 4px; }
+.profile-mini { display: grid; gap: 6px; }
 .feed-column { display: grid; gap: 18px; }
 .composer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 16px; }
 .composer a { flex: 1; padding: 14px 16px; border-radius: 999px; background: #f1f7f4; color: var(--muted); }
@@ -33,6 +37,12 @@
 .actions { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); }
 .actions button, .actions a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: 0; padding: 13px 8px; text-align: center; color: var(--green-dark); font-weight: 850; cursor: pointer; }
 .actions span { font-size: 1.15rem; }
-.load-more { text-align: center; padding: 14px; border: 1px solid var(--line); background: white; border-radius: 8px; color: var(--green-dark); font-weight: 900; }
+.load-more, .empty-state { text-align: center; padding: 18px; border: 1px solid var(--line); background: white; border-radius: 18px; color: var(--green-dark); font-weight: 900; box-shadow: var(--shadow); }
 @media (max-width: 1080px) { .social-layout { grid-template-columns: minmax(0, 1fr); } .side-panel { position: static; } .trends { display: none; } }
-@media (max-width: 620px) { .actions { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 620px) {
+    .social-layout { padding: 14px 10px; gap: 14px; }
+    .composer { grid-template-columns: auto 1fr; }
+    .composer .composer-action { grid-column: 1 / -1; text-align: center; }
+    .actions { grid-template-columns: repeat(2, 1fr); }
+    .feed-card header { align-items: flex-start; }
+}

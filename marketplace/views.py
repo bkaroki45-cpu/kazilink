@@ -9,6 +9,7 @@ from django.db.models import Count, Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .forms import (
@@ -22,8 +23,6 @@ from .models import (
 
 
 def landing(request):
-    if request.user.is_authenticated:
-        return redirect('feed')
     stats = {
         'jobs': Job.objects.filter(status=Job.OPEN).count(),
         'employers': User.objects.filter(jobs__isnull=False).distinct().count(),
@@ -43,6 +42,9 @@ def register(request):
             Profile.objects.create(user=user, role=Profile.SEEKER)
             login(request, user)
             messages.success(request, 'Welcome to KaziLink. Your profile is ready.')
+            next_url = request.GET.get('next')
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
             return redirect('feed')
     else:
         form = RegisterForm()
@@ -54,6 +56,9 @@ def login_view(request):
         form = LoginForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
+            next_url = request.GET.get('next')
+            if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+                return redirect(next_url)
             return redirect('feed')
     else:
         form = LoginForm()
@@ -144,8 +149,25 @@ def find_jobs(request):
     else:
         jobs = jobs.order_by('-created_at')
 
+    map_jobs = []
+    for job in jobs:
+        if job.latitude and job.longitude:
+            map_jobs.append({
+                'id': job.id,
+                'title': job.title,
+                'location': job.location,
+                'salary': str(job.salary) if job.salary else '',
+                'lat': float(job.latitude),
+                'lng': float(job.longitude),
+                'url': job.get_absolute_url(),
+                'distance': getattr(job, 'distance', None),
+            })
+
     return render(request, 'marketplace/find_jobs.html', {
         'jobs': jobs,
+        'map_jobs': map_jobs,
+        'user_latitude': float(request.user.profile.latitude) if request.user.profile.latitude else None,
+        'user_longitude': float(request.user.profile.longitude) if request.user.profile.longitude else None,
         'categories': Category.objects.all(),
         'job_types': Job.TYPE_CHOICES,
         'filters': request.GET,
@@ -170,15 +192,9 @@ def job_detail(request, pk):
             return redirect(job)
     job.views = job.views + 1
     job.save(update_fields=['views'])
-    map_url = ''
-    if job.latitude and job.longitude:
-        lat = float(job.latitude)
-        lng = float(job.longitude)
-        map_url = (
-            'https://www.openstreetmap.org/export/embed.html'
-            f'?bbox={lng - 0.02}%2C{lat - 0.02}%2C{lng + 0.02}%2C{lat + 0.02}'
-            f'&layer=mapnik&marker={lat}%2C{lng}'
-        )
+    employer_followed = False
+    if request.user != job.employer:
+        employer_followed = Follow.objects.filter(follower=request.user, followed=job.employer).exists()
     return render(request, 'marketplace/job_detail.html', {
         'job': job,
         'comment_form': CommentForm(),
@@ -186,8 +202,12 @@ def job_detail(request, pk):
         'has_applied': Application.objects.filter(job=job, applicant=request.user).exists(),
         'is_saved': SavedJob.objects.filter(job=job, user=request.user).exists(),
         'is_liked': JobLike.objects.filter(job=job, user=request.user).exists(),
+        'is_following_employer': employer_followed,
         'status_choices': Job.STATUS_CHOICES,
-        'map_url': map_url,
+        'job_latitude': float(job.latitude) if job.latitude else None,
+        'job_longitude': float(job.longitude) if job.longitude else None,
+        'user_latitude': float(request.user.profile.latitude) if request.user.profile.latitude else None,
+        'user_longitude': float(request.user.profile.longitude) if request.user.profile.longitude else None,
     })
 
 
@@ -301,7 +321,7 @@ def toggle_follow(request, username):
         follow, created = Follow.objects.get_or_create(follower=request.user, followed=followed)
         if not created:
             follow.delete()
-    return redirect('profile_detail', username=username)
+    return redirect(request.POST.get('next') or reverse('profile_detail', kwargs={'username': username}))
 
 
 @login_required
@@ -349,6 +369,9 @@ def chat_messages_api(request, conversation_id):
             'sender': message.sender.username,
             'mine': message.sender_id == request.user.id,
             'body': message.body,
+            'image': message.image.url if message.image else '',
+            'voice_note': message.voice_note.url if message.voice_note else '',
+            'attachment': message.attachment.url if message.attachment else '',
             'time': message.created_at.strftime('%H:%M'),
             'seen': message.seen,
         }

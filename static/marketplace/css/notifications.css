@@ -1,4 +1,8 @@
-.notifications-page { width: min(860px, calc(100% - 28px)); margin: 24px auto; }
+.notifications-page {
+    width: min(860px, calc(100% - 28px));
+    margin: 24px auto;
+    padding: 18px 0 40px;
+}
 .notifications-page h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
 .notification-list { display: grid; gap: 12px; }
 .notification {
@@ -7,9 +11,19 @@
     padding: 18px;
     border: 1px solid var(--line);
     background: white;
-    border-radius: 8px;
+    border-radius: 18px;
     box-shadow: var(--shadow);
     transition: transform .2s ease;
+    color: var(--text);
 }
 .notification:hover { transform: translateY(-2px); }
 .notification.unread { border-left: 5px solid var(--green); }
+.notification small { color: var(--muted); }
+.empty-state {
+    padding: 34px;
+    border-radius: 22px;
+    background: white;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--line);
+    text-align: center;
+}

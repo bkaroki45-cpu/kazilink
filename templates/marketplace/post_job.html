@@ -1,23 +1,113 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Post Job | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">{% endblock %}
-{% block content %}
-<main class="form-shell">
-    <section class="form-intro">
-        <p class="eyebrow">Community marketplace</p>
-        <h1>Post a job people can trust.</h1>
-        <p>Add a clear title, payout, location, photos, documents, and contact details. Use GPS detection so nearby workers can discover it first.</p>
-        <button class="btn ghost" type="button" data-detect-location data-nearby-target="stay"><span class="nav-icon">⌖</span>Detect GPS automatically</button>
-        <div id="map-preview">GPS map preview appears here after detection.</div>
-    </section>
-    <form class="job-form" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {% for field in form %}
-            {% if field.is_hidden %}{{ field }}{% else %}<label>{{ field.label }}{{ field }}{{ field.errors }}</label>{% endif %}
-        {% endfor %}
-        <button class="btn primary" type="submit">Publish Job</button>
-    </form>
-</main>
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">
 {% endblock %}
-{% block page_js %}<script src="{% static 'marketplace/js/location.js' %}"></script>{% endblock %}
+
+{% block content %}
+
+<main class="job-page">
+
+    <!-- TOP HEADER -->
+    <header class="page-header">
+
+        <div>
+            <h1>Post a Job</h1>
+            <p>Create a new opportunity and connect with skilled talent instantly.</p>
+        </div>
+
+        <button class="gps-btn" type="button" data-detect-location data-nearby-target="stay">
+            ⌖ Detect My Location
+        </button>
+
+    </header>
+
+    <!-- MAIN GRID -->
+    <section class="job-grid">
+
+        <!-- LEFT INFO PANEL -->
+        <aside class="info-panel">
+
+            <h2>How it works</h2>
+
+            <div class="info-card">
+                <h3>1. Add details</h3>
+                <p>Describe the job clearly so workers understand requirements.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>2. Set location</h3>
+                <p>GPS helps nearby workers discover your job faster.</p>
+            </div>
+
+            <div class="info-card">
+                <h3>3. Publish</h3>
+                <p>Your job becomes visible instantly on KaziLink.</p>
+            </div>
+
+            <div id="map-preview">
+                <span>Location preview will appear here</span>
+            </div>
+
+        </aside>
+
+        <!-- FORM PANEL -->
+        <section class="form-panel">
+
+            <form class="job-form" method="post" enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="form-title">
+                    <h2>Job Details</h2>
+                    <p>Fill all required fields</p>
+                </div>
+
+                <div class="form-body">
+
+                    {% for field in form %}
+
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
+                            <div class="field">
+
+                                <label>{{ field.label }}</label>
+
+                                {{ field }}
+
+                                {% if field.help_text %}
+                                    <small>{{ field.help_text }}</small>
+                                {% endif %}
+
+                                <div class="error">
+                                    {{ field.errors }}
+                                </div>
+
+                            </div>
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+                <button class="submit-btn" type="submit">
+                    Publish Job
+                </button>
+
+            </form>
+
+        </section>
+
+    </section>
+
+</main>
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'marketplace/js/location.js' %}"></script>
+{% endblock %}

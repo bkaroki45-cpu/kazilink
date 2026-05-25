@@ -1,35 +1,121 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Chat | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/chat.css' %}">{% endblock %}
-{% block content %}
-<main class="chat-page">
-    <header class="chat-header">
-        <div>
-            <h1>{% for participant in conversation.participants.all %}{% if participant != user %}{{ participant.username }} {% endif %}{% endfor %}</h1>
-            <small><span class="online-dot"></span> Online status and typing indicators ready for Channels</small>
-        </div>
-        <a class="btn ghost" href="{% url 'inbox' %}">Inbox</a>
-    </header>
-    <section class="messages-pane" data-chat-pane data-chat-url="{% url 'chat_messages_api' conversation.id %}">
-        {% for message in conversation.messages.all %}
-            <article class="bubble {% if message.sender == user %}mine{% endif %}" data-message-id="{{ message.id }}">
-                <p>{{ message.body }}</p>
-                {% if message.image %}<img src="{{ message.image.url }}" alt="Chat image">{% endif %}
-                {% if message.voice_note %}<audio controls src="{{ message.voice_note.url }}"></audio>{% endif %}
-                {% if message.attachment %}<a href="{{ message.attachment.url }}">Download file</a>{% endif %}
-                <small>{{ message.created_at|time:"H:i" }}{% if message.seen and message.sender == user %} · Seen{% endif %}</small>
-            </article>
-        {% endfor %}
-    </section>
-    <form class="message-box" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ message_form.body }}
-        <label>Image {{ message_form.image }}</label>
-        <label>Voice {{ message_form.voice_note }}</label>
-        <label>File {{ message_form.attachment }}</label>
-        <button class="btn primary">Send</button>
-    </form>
-</main>
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/chat.css' %}">
 {% endblock %}
-{% block page_js %}<script src="{% static 'marketplace/js/chat.js' %}"></script>{% endblock %}
+
+{% block content %}
+
+<main class="chat-page">
+
+    <!-- HEADER -->
+    <header class="chat-header">
+
+        <div class="chat-user">
+            <h1>
+                {% for participant in conversation.participants.all %}
+                    {% if participant != user %}{{ participant.username }}{% endif %}
+                {% endfor %}
+            </h1>
+
+            <div class="status">
+                <span class="online-dot"></span>
+                <small>Online • typing enabled</small>
+            </div>
+        </div>
+
+        <a class="btn ghost" href="{% url 'inbox' %}">
+            Inbox
+        </a>
+
+    </header>
+
+    <!-- MESSAGES -->
+    <section class="messages-pane" data-chat-pane data-chat-url="{% url 'chat_messages_api' conversation.id %}">
+
+        {% for message in conversation.messages.all %}
+
+            <article class="bubble {% if message.sender == user %}mine{% endif %}"
+                     data-message-id="{{ message.id }}">
+
+                <p>{{ message.body }}</p>
+
+                {% if message.image %}
+                    <img src="{{ message.image.url }}" alt="attachment">
+                {% endif %}
+
+                {% if message.voice_note %}
+                    <audio controls src="{{ message.voice_note.url }}"></audio>
+                {% endif %}
+
+                {% if message.attachment %}
+                    <a class="file-link" href="{{ message.attachment.url }}">⬇ Download file</a>
+                {% endif %}
+
+                <small>
+                    {{ message.created_at|time:"H:i" }}
+                    {% if message.seen and message.sender == user %} • Seen{% endif %}
+                </small>
+
+            </article>
+
+        {% endfor %}
+
+    </section>
+
+    <!-- INPUT -->
+    <form class="message-box" method="post" enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <!-- ATTACHMENTS -->
+        <div class="attachment-picker" data-attachment-picker>
+
+            <button class="attach-btn" type="button" data-attachment-toggle>
+                +
+            </button>
+
+            <div class="attachment-menu" data-attachment-menu>
+
+                <label>
+                    📷 Image
+                    {{ message_form.image }}
+                </label>
+
+                <label>
+                    🎤 Voice
+                    {{ message_form.voice_note }}
+                </label>
+
+                <label>
+                    📎 File
+                    {{ message_form.attachment }}
+                </label>
+
+            </div>
+
+        </div>
+
+        <!-- TEXT -->
+        <div class="input-wrapper">
+            {{ message_form.body }}
+        </div>
+
+        <span class="attachment-name" data-attachment-name></span>
+
+        <button class="send-btn" type="submit">
+            Send
+        </button>
+
+    </form>
+
+</main>
+
+{% endblock %}
+
+{% block page_js %}
+<script src="{% static 'marketplace/js/chat.js' %}"></script>
+{% endblock %}

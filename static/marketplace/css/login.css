@@ -1,0 +1,205 @@
+:root {
+    --green: #30b64b;
+    --green-dark: #12832b;
+    --ink: #0b1f14;
+    --line: rgba(255,255,255,0.12);
+    --shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+
+/* =========================
+   MAIN LAYOUT
+========================= */
+.auth-page {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    grid-template-columns: 1.1fr 520px;
+    gap: 32px;
+    padding: clamp(20px, 5vw, 70px);
+    align-items: stretch;
+    background: radial-gradient(circle at top, #071b10, #050b08);
+}
+
+/* =========================
+   LEFT VISUAL
+========================= */
+.auth-visual {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: clamp(28px, 6vw, 70px);
+    border-radius: 18px;
+    overflow: hidden;
+    color: #fff;
+    min-height: 520px;
+    background: url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=1600&q=90') center/cover no-repeat;
+    transform: translateY(0);
+    transition: transform 0.4s ease;
+}
+
+.auth-visual:hover {
+    transform: scale(1.01);
+}
+
+.auth-visual .overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        180deg,
+        rgba(0,0,0,0.2),
+        rgba(0,79,42,0.85)
+    );
+}
+
+.auth-visual-content {
+    position: relative;
+    z-index: 2;
+    max-width: 420px;
+}
+
+.auth-visual h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    margin: 0 0 14px;
+    letter-spacing: -1px;
+}
+
+.auth-visual p {
+    font-size: 1.05rem;
+    opacity: 0.9;
+}
+
+/* badges */
+.auth-badges {
+    margin-top: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.auth-badges span {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+}
+
+/* =========================
+   LOGIN CARD
+========================= */
+.auth-card {
+    display: grid;
+    gap: 16px;
+    padding: clamp(24px, 4vw, 42px);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(18px);
+    box-shadow: var(--shadow);
+    border: 1px solid rgba(255,255,255,0.2);
+    align-content: center;
+}
+
+/* header */
+.auth-header h2 {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--ink);
+}
+
+.auth-header p {
+    margin: 4px 0 0;
+    font-size: 0.95rem;
+    color: #4b4b4b;
+}
+
+/* =========================
+   INPUTS
+========================= */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #222;
+}
+
+.auth-card input,
+.auth-card select,
+.auth-card textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    outline: none;
+    transition: 0.25s ease;
+    font-size: 1rem;
+    background: #fff;
+}
+
+.auth-card input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(48,182,75,0.15);
+}
+
+/* errors */
+.input-error {
+    font-size: 0.8rem;
+    color: #c0392b;
+}
+
+/* =========================
+   BUTTON
+========================= */
+.btn.primary {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-weight: 600;
+}
+
+.btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(48,182,75,0.3);
+}
+
+/* footer */
+.auth-footer {
+    text-align: center;
+    font-size: 0.95rem;
+}
+
+.auth-footer a {
+    color: var(--green-dark);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 920px) {
+    .auth-page {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-visual {
+        min-height: 280px;
+        border-radius: 14px;
+    }
+
+    .auth-card {
+        border-radius: 14px;
+    }
+}

@@ -4,11 +4,13 @@ function getCookie(name) {
 
 document.querySelectorAll('[data-detect-location]').forEach((button) => {
     button.addEventListener('click', () => {
+        const originalText = button.textContent.trim();
         if (!navigator.geolocation) {
             button.textContent = 'GPS unavailable';
             return;
         }
         button.textContent = 'Detecting...';
+        button.disabled = true;
         navigator.geolocation.getCurrentPosition((position) => {
             const lat = position.coords.latitude.toFixed(6);
             const lng = position.coords.longitude.toFixed(6);
@@ -32,9 +34,22 @@ document.querySelectorAll('[data-detect-location]').forEach((button) => {
                 const url = new URL(window.location.href);
                 url.searchParams.set('nearby', '1');
                 window.location.href = url.toString();
+            } else if (button.dataset.nearbyTarget === 'reload-current') {
+                window.location.reload();
+            } else {
+                window.setTimeout(() => {
+                    button.textContent = originalText || 'Use GPS';
+                    button.disabled = false;
+                }, 1800);
             }
-        }, () => {
+        }, (error) => {
             button.textContent = 'Allow GPS access';
+            button.disabled = false;
+            button.title = error.message || 'Your browser blocked location access.';
+        }, {
+            enableHighAccuracy: true,
+            timeout: 12000,
+            maximumAge: 60000,
         });
     });
 });

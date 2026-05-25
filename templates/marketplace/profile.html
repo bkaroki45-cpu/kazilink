@@ -1,49 +1,179 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}{{ profile_user.username }} | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/profile.css' %}">{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/profile.css' %}">
+{% endblock %}
+
 {% block content %}
+
 <main class="profile-page">
-    <section class="profile-hero" {% if profile_user.profile.cover_photo %}style="background-image:url('{{ profile_user.profile.cover_photo.url }}')"{% endif %}>
+
+    <!-- HERO -->
+    <section class="profile-hero"
+        {% if profile_user.profile.cover_photo %}
+        style="background-image:url('{{ profile_user.profile.cover_photo.url }}')"
+        {% endif %}
+    >
+
+        <div class="hero-overlay"></div>
+
         <div class="profile-card">
-            <span class="avatar big">{{ profile_user.username|first|upper }}</span>
-            <h1>{{ profile_user.username }} {% if profile_user.profile.verified %}<span>Verified</span>{% endif %}</h1>
-            <p>{{ profile_user.profile.bio|default:'KaziLink member building trusted work connections.' }}</p>
+
+            <div class="profile-top">
+
+                <div class="avatar big">
+                    {{ profile_user.username|first|upper }}
+                </div>
+
+                <div class="profile-info">
+
+                    <h1>
+                        {{ profile_user.username }}
+
+                        {% if profile_user.profile.verified %}
+                            <span class="verified">Verified</span>
+                        {% endif %}
+                    </h1>
+
+                    <p class="bio">
+                        {{ profile_user.profile.bio|default:'KaziLink member building trusted work connections.' }}
+                    </p>
+
+                </div>
+
+            </div>
+
             <div class="profile-actions">
-                {% if user == profile_user %}<a class="btn primary" href="{% url 'edit_profile' %}">Edit Profile</a>{% endif %}
-                {% if user != profile_user %}<a class="btn primary" href="{% url 'start_conversation' profile_user.username %}">Chat Me</a><form method="post" action="{% url 'toggle_follow' profile_user.username %}">{% csrf_token %}<button class="btn ghost">{% if is_following %}Following{% else %}Follow{% endif %}</button></form>{% endif %}
+
+                {% if user == profile_user %}
+                    <a class="btn primary" href="{% url 'edit_profile' %}">Edit Profile</a>
+                {% endif %}
+
+                {% if user != profile_user %}
+                    <a class="btn primary" href="{% url 'start_conversation' profile_user.username %}">
+                        Message
+                    </a>
+
+                    <form method="post" action="{% url 'toggle_follow' profile_user.username %}">
+                        {% csrf_token %}
+                        <button class="btn ghost">
+                            {% if is_following %}Following{% else %}Follow{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+
             </div>
+
         </div>
+
     </section>
+
+    <!-- MAIN GRID -->
     <section class="profile-grid">
-        <aside>
-            <h2>Trust profile</h2>
-            <p>Account: Can post jobs and find work</p>
-            <p>Skills: {{ profile_user.profile.skills|default:'Not listed yet' }}</p>
-            <p>Location: {{ profile_user.profile.location|default:'Flexible' }}</p>
-            <p>Rating: {{ profile_user.profile.rating_average }} / 5</p>
-            <p>Trust score: {{ profile_user.profile.trust_score }}%</p>
-        </aside>
-        <section>
-            <h2>Jobs and updates</h2>
-            <div class="mini-grid">
-                {% for job in jobs %}<a class="mini-card" href="{{ job.get_absolute_url }}"><strong>{{ job.title }}</strong><small>{{ job.get_status_display }} · {{ job.location }}</small></a>{% empty %}<p>No public jobs yet.</p>{% endfor %}
+
+        <!-- LEFT TRUST PANEL -->
+        <aside class="card trust-card">
+
+            <h2>Trust Profile</h2>
+
+            <div class="trust-item">
+                <span>Role</span>
+                <strong>Job Marketplace Member</strong>
             </div>
-            {% for update in updates %}<article class="update"><p>{{ update.body }}</p></article>{% endfor %}
-        </section>
-        <aside>
-            <h2>Reviews</h2>
-            {% if user != profile_user %}
-                <form class="review-form" method="post" action="{% url 'review_user' profile_user.username %}">
-                    {% csrf_token %}
-                    <input name="rating" type="number" min="1" max="5" value="5">
-                    <textarea name="body" rows="3" placeholder="Write a public review"></textarea>
-                    <label class="check"><input type="checkbox" name="positive" checked> Positive</label>
-                    <button class="btn mini">Review</button>
-                </form>
-            {% endif %}
-            {% for review in reviews %}<article class="review"><strong>{{ review.rating }} stars</strong><p>{{ review.body }}</p><small>{{ review.reviewer.username }}</small></article>{% empty %}<p>No reviews yet.</p>{% endfor %}
+
+            <div class="trust-item">
+                <span>Skills</span>
+                <p>{{ profile_user.profile.skills|default:'Not listed yet' }}</p>
+            </div>
+
+            <div class="trust-item">
+                <span>Location</span>
+                <p>{{ profile_user.profile.location|default:'Flexible' }}</p>
+            </div>
+
+            <div class="trust-stats">
+
+                <div>
+                    <strong>{{ profile_user.profile.rating_average }}</strong>
+                    <span>Rating</span>
+                </div>
+
+                <div>
+                    <strong>{{ profile_user.profile.trust_score }}%</strong>
+                    <span>Trust Score</span>
+                </div>
+
+            </div>
+
         </aside>
+
+        <!-- CENTER CONTENT -->
+        <section class="card main-content">
+
+            <h2>Activity</h2>
+
+            <div class="mini-grid">
+
+                {% for job in jobs %}
+                    <a class="mini-card" href="{{ job.get_absolute_url }}">
+                        <strong>{{ job.title }}</strong>
+                        <small>{{ job.get_status_display }} · {{ job.location }}</small>
+                    </a>
+                {% empty %}
+                    <p class="empty">No public jobs yet.</p>
+                {% endfor %}
+
+            </div>
+
+            <h2 class="section-title">Recent Updates</h2>
+
+            {% for update in updates %}
+                <article class="update">
+                    <p>{{ update.body }}</p>
+                </article>
+            {% empty %}
+                <p class="empty">No updates yet.</p>
+            {% endfor %}
+
+        </section>
+
+        <!-- RIGHT REVIEWS -->
+        <aside class="card reviews-card">
+
+            <h2>Reviews</h2>
+
+            {% if user != profile_user %}
+            <form class="review-form" method="post" action="{% url 'review_user' profile_user.username %}">
+                {% csrf_token %}
+                <input name="rating" type="number" min="1" max="5" value="5">
+                <textarea name="body" rows="3" placeholder="Write a review"></textarea>
+
+                <label class="check">
+                    <input type="checkbox" name="positive" checked>
+                    Positive review
+                </label>
+
+                <button class="btn mini">Submit</button>
+            </form>
+            {% endif %}
+
+            {% for review in reviews %}
+                <article class="review">
+                    <div class="stars">{{ review.rating }} ★</div>
+                    <p>{{ review.body }}</p>
+                    <small>— {{ review.reviewer.username }}</small>
+                </article>
+            {% empty %}
+                <p class="empty">No reviews yet.</p>
+            {% endfor %}
+
+        </aside>
+
     </section>
+
 </main>
+
 {% endblock %}

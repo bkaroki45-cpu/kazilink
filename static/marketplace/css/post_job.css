@@ -1,23 +1,247 @@
-.form-shell {
+/* =========================
+   PAGE BASE
+========================= */
+.job-page {
+    min-height: 100vh;
+    padding: 40px clamp(16px, 5vw, 80px);
+    background:
+        radial-gradient(circle at 12% 0%, rgba(0,196,106,.14), transparent 30%),
+        linear-gradient(180deg, #071b10 0%, #050b08 100%);
     display: grid;
-    grid-template-columns: .9fr 1.1fr;
     gap: 28px;
-    padding: clamp(18px, 5vw, 64px);
 }
-.form-intro, .job-form {
-    border: 1px solid var(--line);
-    background: rgba(255,255,255,.88);
-    box-shadow: var(--shadow);
-    border-radius: 8px;
-    padding: clamp(22px, 4vw, 38px);
+
+/* =========================
+   HEADER
+========================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
 }
-.form-intro {
-    min-height: 520px;
-    background: linear-gradient(rgba(0,79,42,.08), rgba(0,79,42,.86)), url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1300&q=90') center/cover;
+
+.page-header h1 {
+    margin: 0;
+    font-size: clamp(2rem, 3vw, 3rem);
     color: white;
+    letter-spacing: -1px;
 }
-.form-intro .eyebrow { color: #caffdf; }
-.form-intro h1 { font-size: clamp(2rem, 5vw, 4rem); margin: 0 0 14px; }
-.job-form { display: grid; gap: 15px; }
-#map-preview { margin-top: 18px; padding: 16px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); border-radius: 8px; }
-@media (max-width: 900px) { .form-shell { grid-template-columns: 1fr; } .form-intro { min-height: 300px; } }
+
+.page-header p {
+    margin: 6px 0 0;
+    color: #b6d9c3;
+}
+
+/* GPS button */
+.gps-btn {
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: 0.25s ease;
+    font-weight: 600;
+}
+
+.gps-btn:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.15);
+}
+
+/* =========================
+   MAIN GRID
+========================= */
+.job-grid {
+    display: grid;
+    grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+    gap: 26px;
+}
+
+/* =========================
+   INFO PANEL
+========================= */
+.info-panel {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(14px);
+    border-radius: 16px;
+    padding: 22px;
+    color: white;
+    display: grid;
+    gap: 14px;
+}
+
+.info-panel h2 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.info-card {
+    padding: 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.info-card h3 {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+}
+
+.info-card p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #cfe8d8;
+}
+
+/* map preview */
+#map-preview {
+    margin-top: 10px;
+    min-height: 120px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    color: #d2f5df;
+    overflow: hidden;
+}
+
+#map-preview iframe {
+    display: block;
+    min-height: 240px;
+}
+
+/* =========================
+   FORM PANEL
+========================= */
+.form-panel {
+    display: flex;
+    justify-content: center;
+}
+
+.job-form {
+    width: 100%;
+    max-width: 700px;
+    background: rgba(255,255,255,0.96);
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.25);
+    display: grid;
+    gap: 18px;
+}
+
+/* form header */
+.form-title h2 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.form-title p {
+    margin: 5px 0 0;
+    color: #666;
+}
+
+/* form body */
+.form-body {
+    display: grid;
+    gap: 14px;
+}
+
+/* fields */
+.field {
+    display: grid;
+    gap: 6px;
+}
+
+.field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #222;
+}
+
+input, select, textarea {
+    padding: 12px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.25s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: #30b64b;
+    box-shadow: 0 0 0 4px rgba(48,182,75,0.15);
+}
+
+/* help/error */
+small {
+    font-size: 0.75rem;
+    color: #777;
+}
+
+.error {
+    font-size: 0.75rem;
+    color: #c0392b;
+}
+
+/* submit button */
+.submit-btn {
+    margin-top: 10px;
+    padding: 14px;
+    border-radius: 14px;
+    border: none;
+    font-weight: 700;
+    color: white;
+    background: linear-gradient(135deg, #30b64b, #12832b);
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(48,182,75,0.3);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+    .job-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-panel {
+        order: 2;
+    }
+
+    .job-form {
+        padding: 25px;
+    }
+}
+
+@media (max-width: 560px) {
+    .job-page {
+        padding: 18px 10px;
+    }
+
+    .page-header {
+        align-items: stretch;
+    }
+
+    .gps-btn,
+    .submit-btn {
+        width: 100%;
+    }
+
+    .job-form,
+    .info-panel {
+        border-radius: 20px;
+    }
+}

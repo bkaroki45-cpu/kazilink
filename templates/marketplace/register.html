@@ -1,22 +1,64 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Join KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/auth.css' %}">{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/register.css' %}">
+{% endblock %}
+
 {% block content %}
-<main class="auth-page">
-    <section class="auth-visual">
-        <h1>Join one marketplace for work.</h1>
-        <p>Create one account. Post jobs, find jobs, chat, review, and discover nearby opportunities whenever you need.</p>
+<main class="auth-wrapper">
+
+    <!-- LEFT / VISUAL SIDE -->
+    <section class="auth-left">
+        <div class="overlay"></div>
+        <div class="auth-text">
+            <h1>Find Work. Hire Talent. Grow Faster.</h1>
+            <p>
+                Join KaziLink — Kenya’s modern job marketplace where opportunities meet talent in real time.
+            </p>
+
+            <div class="features">
+                <div>✔ Job Posting & Applications</div>
+                <div>✔ Chat with Employers</div>
+                <div>✔ Nearby Opportunities</div>
+            </div>
+        </div>
     </section>
-    <form class="auth-card" method="post">
-        {% csrf_token %}
-        <h2>Create account</h2>
-        {{ form.non_field_errors }}
-        {% for field in form %}
-            <label>{{ field.label }}{{ field }}{{ field.errors }}</label>
-        {% endfor %}
-        <button class="btn primary" type="submit">Create Account</button>
-        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
-    </form>
+
+    <!-- RIGHT / FORM SIDE -->
+    <section class="auth-right">
+
+        <form class="auth-card" method="post">
+            {% csrf_token %}
+
+            <h2>Create Account</h2>
+            <p class="sub">It only takes a few seconds</p>
+
+            {{ form.non_field_errors }}
+
+            <div class="form-grid">
+                {% for field in form %}
+                    <div class="form-group">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        <small class="error">{{ field.errors }}</small>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <button class="btn-primary" type="submit">
+                Create Account
+            </button>
+
+            <p class="switch">
+                Already have an account?
+                <a href="{% url 'login' %}">Login</a>
+            </p>
+        </form>
+
+    </section>
+
 </main>
 {% endblock %}

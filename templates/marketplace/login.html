@@ -1,22 +1,61 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Login | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/auth.css' %}">{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/login.css' %}">
+{% endblock %}
+
 {% block content %}
 <main class="auth-page compact">
+
+    <!-- LEFT VISUAL PANEL -->
     <section class="auth-visual">
-        <h1>Welcome back.</h1>
-        <p>Your job feed, conversations, and applications are waiting.</p>
+        <div class="overlay"></div>
+        <div class="auth-visual-content">
+            <h1>Welcome back.</h1>
+            <p>Your job feed, conversations, and applications are waiting.</p>
+            <div class="auth-badges">
+                <span>✓ Secure Login</span>
+                <span>✓ Fast Access</span>
+                <span>✓ Verified Platform</span>
+            </div>
+        </div>
     </section>
-    <form class="auth-card" method="post">
+
+    <!-- LOGIN CARD -->
+    <form class="auth-card" method="post" autocomplete="on">
         {% csrf_token %}
-        <h2>Login</h2>
+
+        <div class="auth-header">
+            <h2>Login</h2>
+            <p>Access your KaziLink account</p>
+        </div>
+
         {{ form.non_field_errors }}
+
         {% for field in form %}
-            <label>{{ field.label }}{{ field }}{{ field.errors }}</label>
+            <div class="input-group">
+                <label class="input-label">
+                    {{ field.label }}
+                </label>
+                {{ field }}
+                <div class="input-error">
+                    {{ field.errors }}
+                </div>
+            </div>
         {% endfor %}
-        <button class="btn primary" type="submit">Login</button>
-        <p>New here? <a href="{% url 'register' %}">Create an account</a></p>
+
+        <button class="btn primary" type="submit">
+            Login
+        </button>
+
+        <div class="auth-footer">
+            <p>New here? <a href="{% url 'register' %}">Create an account</a></p>
+        </div>
+
     </form>
+
 </main>
 {% endblock %}

@@ -1,7 +1,10 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 {% block title %}{{ job.title }} | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">{% endblock %}
+{% block page_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">
+{% endblock %}
 {% block content %}
 <main class="detail-layout">
     <article class="job-detail">
@@ -19,8 +22,26 @@
             <span>Skills <b>{{ job.required_skills|default:'Open' }}</b></span>
             <span>Contact <b>{{ job.contact_information }}</b></span>
         </div>
-        {% if map_url %}
-            <iframe class="detail-map" title="Job map" src="{{ map_url }}"></iframe>
+        {% if job_latitude and job_longitude %}
+            <section class="detail-map-panel">
+                <div class="map-toolbar">
+                    <div>
+                        <strong>Aerial route map</strong>
+                        <small>Blue is you. Green is exactly where the job was posted.</small>
+                    </div>
+                    <button class="btn mini" type="button" data-detect-location data-nearby-target="reload-current">Refresh GPS</button>
+                </div>
+                <div
+                    id="job-detail-map"
+                    class="detail-map"
+                    data-job-title="{{ job.title }}"
+                    data-job-location="{{ job.location }}"
+                    data-job-lat="{{ job_latitude }}"
+                    data-job-lng="{{ job_longitude }}"
+                    data-user-lat="{{ user_latitude|default:'' }}"
+                    data-user-lng="{{ user_longitude|default:'' }}"
+                ></div>
+            </section>
         {% endif %}
         {% if job.document %}<a class="btn ghost" href="{{ job.document.url }}">Download document</a>{% endif %}
         {% if user == job.employer %}
@@ -36,6 +57,13 @@
                 <button class="btn primary">Save Status</button>
                 <small>When marked Taken or Closed, this job disappears from the public feed.</small>
             </form>
+            {% if job.status != 'taken' %}
+                <form class="quick-status" method="post" action="{% url 'update_job_status' job.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="taken">
+                    <button class="btn primary">Mark job taken</button>
+                </form>
+            {% endif %}
         {% endif %}
         <div class="detail-actions">
             <form method="post" action="{% url 'toggle_like' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_liked %}Liked{% else %}Like{% endif %}</button></form>
@@ -49,6 +77,13 @@
             <strong>{{ job.employer.username }}</strong>
             <small>{{ job.employer.profile.rating_average }} star rating</small>
         </a>
+        {% if user != job.employer %}
+            <form class="follow-inline" method="post" action="{% url 'toggle_follow' job.employer.username %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                <button class="btn ghost">{% if is_following_employer %}Following employer{% else %}Follow employer{% endif %}</button>
+            </form>
+        {% endif %}
         {% if user != job.employer %}
             <form method="post" action="{% url 'apply_job' job.pk %}">
                 {% csrf_token %}
@@ -65,4 +100,9 @@
         </section>
     </aside>
 </main>
+{% endblock %}
+{% block page_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'marketplace/js/location.js' %}"></script>
+<script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
 {% endblock %}

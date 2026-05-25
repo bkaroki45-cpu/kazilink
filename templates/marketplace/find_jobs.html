@@ -1,53 +1,180 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Find Jobs | KaziLink{% endblock %}
-{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/find_jobs.css' %}">{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="{% static 'marketplace/css/find_jobs.css' %}">
+{% endblock %}
+
 {% block content %}
 <main class="search-page">
+
+    <!-- FILTER SIDEBAR -->
     <aside class="filters">
-        <h1>Find Jobs</h1>
-        <button class="btn ghost" type="button" data-detect-location data-nearby-target="reload"><span class="nav-icon">⌖</span>Use GPS nearby</button>
+
+        <div class="filters-header">
+            <h1>Find Jobs</h1>
+            <p>Discover opportunities near you</p>
+        </div>
+
+        <button class="btn ghost gps-btn" type="button" data-detect-location data-nearby-target="reload">
+            Use GPS nearby
+        </button>
+
         <form method="get" data-filter-form>
-            <input name="q" value="{{ filters.q }}" placeholder="Search title, skill, keyword">
-            <select name="category">
-                <option value="">All categories</option>
-                {% for category in categories %}<option value="{{ category.id }}" {% if filters.category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>{% endfor %}
-            </select>
-            <input name="location" value="{{ filters.location }}" placeholder="Location">
-            <select name="job_type">
-                <option value="">Any job type</option>
-                {% for value,label in job_types %}<option value="{{ value }}" {% if filters.job_type == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
-            </select>
-            <div class="range-row">
-                <input name="salary_min" value="{{ filters.salary_min }}" placeholder="Min salary">
-                <input name="salary_max" value="{{ filters.salary_max }}" placeholder="Max salary">
+
+            <div class="input-group">
+                <label>Keyword</label>
+                <input name="q" value="{{ filters.q }}" placeholder="Title, skill, keyword">
             </div>
-            <select name="sort">
-                <option value="latest">Latest jobs</option>
-                <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Most applied</option>
-            </select>
-            <button class="btn primary" type="submit">Search</button>
+
+            <div class="input-group">
+                <label>Category</label>
+                <select name="category">
+                    <option value="">All categories</option>
+                    {% for category in categories %}
+                        <option value="{{ category.id }}" {% if filters.category == category.id|stringformat:'s' %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label>Location</label>
+                <input name="location" value="{{ filters.location }}" placeholder="e.g Nairobi">
+            </div>
+
+            <div class="input-group">
+                <label>Job type</label>
+                <select name="job_type">
+                    <option value="">Any type</option>
+                    {% for value,label in job_types %}
+                        <option value="{{ value }}" {% if filters.job_type == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="range-row">
+                <div class="input-group">
+                    <label>Min salary</label>
+                    <input name="salary_min" value="{{ filters.salary_min }}">
+                </div>
+                <div class="input-group">
+                    <label>Max salary</label>
+                    <input name="salary_max" value="{{ filters.salary_max }}">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Sort by</label>
+                <select name="sort">
+                    <option value="latest">Latest jobs</option>
+                    <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Most applied</option>
+                </select>
+            </div>
+
+            <button class="btn primary full" type="submit">
+                Search Jobs
+            </button>
+
         </form>
     </aside>
+
+    <!-- RESULTS -->
     <section class="results">
-        {% for job in jobs %}
-            <article class="result-card" data-title="{{ job.title|lower }}" data-location="{{ job.location|lower }}">
+
+        <!-- MAP -->
+        <div class="jobs-map-shell">
+
+            <div class="map-toolbar">
                 <div>
-                    <span>{{ job.get_job_type_display }}</span>
-                    <h2><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h2>
-                    <p>{{ job.description|truncatewords:24 }}</p>
+                    <strong>Jobs Map View</strong>
+                    <small>Choose a job below to show its exact location and your position.</small>
                 </div>
-                <footer>
-                    <small>{{ job.location }} · {{ job.category }}</small>
-                    {% if job.distance is not None %}<small>{{ job.distance }} km away</small>{% endif %}
-                    {% if job.salary %}<strong>KSh {{ job.salary }}</strong>{% endif %}
-                    <a class="btn mini" href="{{ job.get_absolute_url }}">View</a>
-                </footer>
+
+                <button class="btn mini" type="button" data-detect-location data-nearby-target="reload">
+                    Use my GPS
+                </button>
+            </div>
+
+            <div
+                id="jobs-map"
+                class="jobs-map"
+                data-user-lat="{{ user_latitude|default:'' }}"
+                data-user-lng="{{ user_longitude|default:'' }}"
+            ></div>
+
+        </div>
+
+        <!-- JOB LIST -->
+        <div class="results-list">
+
+            {% for job in jobs %}
+            <article
+                class="result-card"
+                data-title="{{ job.title|lower }}"
+                data-location="{{ job.location|lower }}"
+                data-job-card="{{ job.id }}"
+            >
+
+                <div class="card-top">
+                    <span class="badge">{{ job.get_job_type_display }}</span>
+                    <h2>
+                        <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
+                    </h2>
+                    <p>{{ job.description|truncatewords:26 }}</p>
+                </div>
+
+                <div class="card-bottom">
+                    <div class="meta">
+                        <span>{{ job.location }}</span>
+                        <span>{{ job.category }}</span>
+
+                        {% if job.distance is not None %}
+                            <span class="distance">{{ job.distance }} km away</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="actions">
+                        {% if job.salary %}
+                            <strong class="salary">KSh {{ job.salary }}</strong>
+                        {% endif %}
+
+                        {% if job.latitude and job.longitude %}
+                            <button class="btn mini map-job-btn" type="button" data-map-job="{{ job.id }}">Show on map</button>
+                        {% else %}
+                            <span class="map-missing">No GPS</span>
+                        {% endif %}
+
+                        <a class="btn mini" href="{{ job.get_absolute_url }}">View</a>
+                    </div>
+                </div>
+
             </article>
-        {% empty %}
-            <article class="empty-state"><h2>No matches found.</h2><p>Try broader filters or check again soon.</p></article>
-        {% endfor %}
+            {% empty %}
+            <article class="empty-state">
+                <h2>No jobs found</h2>
+                <p>Try adjusting filters or expanding your search area.</p>
+            </article>
+            {% endfor %}
+
+        </div>
+
     </section>
+
 </main>
+
+{{ map_jobs|json_script:"jobs-map-data" }}
 {% endblock %}
-{% block page_js %}<script src="{% static 'marketplace/js/location.js' %}"></script><script src="{% static 'marketplace/js/search.js' %}"></script>{% endblock %}
+
+{% block page_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'marketplace/js/location.js' %}"></script>
+<script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
+<script src="{% static 'marketplace/js/search.js' %}"></script>
+{% endblock %}
