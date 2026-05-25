@@ -1,0 +1,23 @@
+.form-shell {
+    display: grid;
+    grid-template-columns: .9fr 1.1fr;
+    gap: 28px;
+    padding: clamp(18px, 5vw, 64px);
+}
+.form-intro, .job-form {
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.88);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    padding: clamp(22px, 4vw, 38px);
+}
+.form-intro {
+    min-height: 520px;
+    background: linear-gradient(rgba(0,79,42,.08), rgba(0,79,42,.86)), url('https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=1300&q=90') center/cover;
+    color: white;
+}
+.form-intro .eyebrow { color: #caffdf; }
+.form-intro h1 { font-size: clamp(2rem, 5vw, 4rem); margin: 0 0 14px; }
+.job-form { display: grid; gap: 15px; }
+#map-preview { margin-top: 18px; padding: 16px; background: rgba(255,255,255,.16); border: 1px solid rgba(255,255,255,.35); border-radius: 8px; }
+@media (max-width: 900px) { .form-shell { grid-template-columns: 1fr; } .form-intro { min-height: 300px; } }

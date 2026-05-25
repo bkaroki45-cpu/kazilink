@@ -1,0 +1,80 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}KaziLink | Connecting Talent With Opportunity Everywhere{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/landing.css' %}">{% endblock %}
+{% block content %}
+<main>
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <p class="eyebrow">Immediate, freelance, casual, and professional work</p>
+            <h1>KaziLink</h1>
+            <p class="tagline">Connecting Talent With Opportunity Everywhere.</p>
+            <div class="hero-actions">
+                <a class="btn primary" href="{% url 'register' %}">Find Jobs</a>
+                <a class="btn ghost" href="{% url 'register' %}">Post Jobs</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="stats-band">
+        <article><strong>{{ stats.jobs }}</strong><span>Open jobs</span></article>
+        <article><strong>{{ stats.employers }}</strong><span>People posting</span></article>
+        <article><strong>{{ stats.seekers }}</strong><span>Members</span></article>
+        <article><strong>24/7</strong><span>Nearby alerts</span></article>
+    </section>
+
+    <section class="section-grid" id="jobs">
+        <div>
+            <p class="eyebrow">Modern job discovery</p>
+            <h2>One feed for every kind of opportunity.</h2>
+            <p>Browse quick gigs, long contracts, professional roles, field work, remote tasks, and local jobs with rich media and trusted profiles.</p>
+        </div>
+        <div class="feature-grid">
+            <article>GPS nearby recommendations</article>
+            <article>Employer ratings and reviews</article>
+            <article>Saved jobs and applications</article>
+            <article>Messenger-style conversations</article>
+        </div>
+    </section>
+
+    <section class="job-showcase" id="post">
+        <div class="section-heading">
+            <p class="eyebrow">Featured jobs</p>
+            <h2>Fresh opportunities, beautifully presented.</h2>
+        </div>
+        <div class="cards">
+            {% for job in featured_jobs %}
+                <article class="job-card">
+                    <span>{{ job.get_job_type_display }}</span>
+                    <h3>{{ job.title }}</h3>
+                    <p>{{ job.description|truncatewords:20 }}</p>
+                    <small>{{ job.location }}{% if job.salary %} · KSh {{ job.salary }}{% endif %}</small>
+                </article>
+            {% empty %}
+                <article class="job-card"><span>Immediate</span><h3>Hospitality crew needed</h3><p>Post your first KaziLink job and it will appear here.</p><small>Nairobi</small></article>
+                <article class="job-card"><span>Freelance</span><h3>Logo designer</h3><p>Creative professionals can connect through trusted public profiles.</p><small>Remote</small></article>
+                <article class="job-card"><span>Long-term</span><h3>Customer support associate</h3><p>Track applications, reviews, and conversations in one clean workspace.</p><small>Mombasa</small></article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="how">
+        <div class="section-heading">
+            <p class="eyebrow">How it works</p>
+            <h2>Designed for speed and trust.</h2>
+        </div>
+        <div class="steps">
+            <article><b>1</b><h3>Create your role</h3><p>Join as an employer or job seeker with validated registration.</p></article>
+            <article><b>2</b><h3>Discover nearby work</h3><p>Use smart filters and GPS recommendations to surface relevant jobs.</p></article>
+            <article><b>3</b><h3>Chat and agree</h3><p>Move from post to profile to inbox without losing context.</p></article>
+        </div>
+    </section>
+
+    <section class="testimonials">
+        <article><p>"KaziLink feels like a proper social network for work. Fast, clean, and local."</p><strong>Amina, Event Manager</strong></article>
+        <article><p>"I can post casual and professional openings from one dashboard."</p><strong>Brian, Employer</strong></article>
+    </section>
+</main>
+<footer class="footer">KaziLink · Connecting Talent With Opportunity Everywhere.</footer>
+{% endblock %}

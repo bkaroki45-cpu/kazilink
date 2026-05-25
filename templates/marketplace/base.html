@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}KaziLink{% endblock %}</title>
+    <link rel="preconnect" href="https://images.unsplash.com">
+    <link rel="stylesheet" href="{% static 'marketplace/css/base.css' %}">
+    {% block page_css %}{% endblock %}
+</head>
+<body>
+    <nav class="topbar">
+        <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
+            <span>K</span>KaziLink
+        </a>
+        <button class="nav-toggle" data-nav-toggle aria-label="Open navigation">Menu</button>
+        <div class="nav-links" data-nav-links>
+            {% if user.is_authenticated %}
+                <a href="{% url 'feed' %}"><span class="nav-icon">⌂</span>Home</a>
+                <a href="{% url 'find_jobs' %}"><span class="nav-icon">⌕</span>Find</a>
+                <a href="{% url 'post_job' %}"><span class="nav-icon">+</span>Post</a>
+                <a href="{% url 'inbox' %}"><span class="nav-icon">✉</span>Chat</a>
+                <a href="{% url 'notifications' %}"><span class="nav-icon">•</span>Alerts</a>
+                <a href="{% url 'profile_detail' user.username %}"><span class="nav-icon">◉</span>Profile</a>
+                <a class="pill-link" href="{% url 'logout' %}">Logout</a>
+            {% else %}
+                <a href="{% url 'landing' %}#jobs">Find Jobs</a>
+                <a href="{% url 'landing' %}#post">Post Jobs</a>
+                <a href="{% url 'login' %}">Login</a>
+                <a class="pill-link" href="{% url 'register' %}">Join Free</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <script src="{% static 'marketplace/js/main.js' %}"></script>
+    {% block page_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,26 @@
+.profile-hero {
+    min-height: 360px;
+    display: grid;
+    align-items: end;
+    padding: clamp(18px, 5vw, 60px);
+    background: linear-gradient(rgba(0,79,42,.12), rgba(0,79,42,.84)), url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=1500&q=90') center/cover;
+}
+.profile-card { max-width: 780px; color: white; }
+.avatar.big { width: 86px; height: 86px; font-size: 2rem; }
+.profile-card h1 { font-size: clamp(2.2rem, 5vw, 4.4rem); margin: 12px 0; }
+.profile-card h1 span { font-size: .85rem; padding: 6px 10px; background: var(--green); border-radius: 999px; vertical-align: middle; }
+.profile-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.profile-grid { display: grid; grid-template-columns: 280px minmax(0, 1fr) 320px; gap: 20px; padding: 24px clamp(14px, 5vw, 60px); align-items: start; }
+.profile-grid > * {
+    border: 1px solid var(--line);
+    background: white;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    padding: 18px;
+}
+.mini-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.mini-card, .update, .review { display: grid; gap: 6px; padding: 14px; background: #f6fbf8; border-radius: 8px; margin-bottom: 10px; }
+.review-form { display: grid; gap: 10px; margin-bottom: 14px; }
+.check { display: flex; align-items: center; gap: 8px; }
+.check input { width: auto; }
+@media (max-width: 1050px) { .profile-grid { grid-template-columns: 1fr; } .mini-grid { grid-template-columns: 1fr; } }

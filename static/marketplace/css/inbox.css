@@ -1,0 +1,15 @@
+.inbox-layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 22px; padding: 24px clamp(14px, 5vw, 60px); min-height: calc(100vh - 80px); }
+.conversation-list, .chat-preview {
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    padding: 18px;
+}
+.conversation-list { display: grid; align-content: start; gap: 10px; }
+.conversation-list a { display: grid; gap: 5px; padding: 14px; border-radius: 8px; background: #f6fbf8; transition: transform .2s ease; }
+.conversation-list a:hover { transform: translateX(3px); }
+.chat-preview { display: grid; align-content: center; justify-items: center; gap: 12px; text-align: center; }
+.chat-preview p.mine { margin-left: auto; background: var(--green); color: white; }
+.chat-preview p { max-width: 420px; padding: 10px 14px; background: #eef7f1; border-radius: 18px; }
+@media (max-width: 850px) { .inbox-layout { grid-template-columns: 1fr; } }

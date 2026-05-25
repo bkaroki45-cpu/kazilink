@@ -1,0 +1,23 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Post Job | KaziLink{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">{% endblock %}
+{% block content %}
+<main class="form-shell">
+    <section class="form-intro">
+        <p class="eyebrow">Community marketplace</p>
+        <h1>Post a job people can trust.</h1>
+        <p>Add a clear title, payout, location, photos, documents, and contact details. Use GPS detection so nearby workers can discover it first.</p>
+        <button class="btn ghost" type="button" data-detect-location data-nearby-target="stay"><span class="nav-icon">⌖</span>Detect GPS automatically</button>
+        <div id="map-preview">GPS map preview appears here after detection.</div>
+    </section>
+    <form class="job-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {% for field in form %}
+            {% if field.is_hidden %}{{ field }}{% else %}<label>{{ field.label }}{{ field }}{{ field.errors }}</label>{% endif %}
+        {% endfor %}
+        <button class="btn primary" type="submit">Publish Job</button>
+    </form>
+</main>
+{% endblock %}
+{% block page_js %}<script src="{% static 'marketplace/js/location.js' %}"></script>{% endblock %}

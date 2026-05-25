@@ -1,0 +1,15 @@
+.notifications-page { width: min(860px, calc(100% - 28px)); margin: 24px auto; }
+.notifications-page h1 { font-size: clamp(2rem, 5vw, 3.5rem); }
+.notification-list { display: grid; gap: 12px; }
+.notification {
+    display: grid;
+    gap: 4px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    transition: transform .2s ease;
+}
+.notification:hover { transform: translateY(-2px); }
+.notification.unread { border-left: 5px solid var(--green); }

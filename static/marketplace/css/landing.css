@@ -1,0 +1,60 @@
+.hero {
+    position: relative;
+    min-height: 74vh;
+    display: grid;
+    align-items: center;
+    padding: clamp(70px, 12vw, 150px) clamp(18px, 6vw, 80px);
+    background: url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1800&q=90') center/cover;
+    color: white;
+}
+.hero-overlay { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,79,42,.9), rgba(0,166,81,.28)); }
+.hero-content { position: relative; max-width: 760px; }
+.hero h1 { margin: 0; font-size: clamp(4rem, 11vw, 8rem); line-height: .9; }
+.tagline { font-size: clamp(1.2rem, 3vw, 2rem); max-width: 660px; }
+.hero-actions { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 28px; }
+.stats-band, .steps, .cards, .testimonials, .feature-grid {
+    display: grid;
+    gap: 18px;
+}
+.stats-band {
+    grid-template-columns: repeat(4, 1fr);
+    padding: 22px clamp(18px, 6vw, 80px);
+    background: white;
+    border-bottom: 1px solid var(--line);
+}
+.stats-band article, .job-card, .steps article, .testimonials article, .feature-grid article {
+    border: 1px solid rgba(255,255,255,.55);
+    background: rgba(255,255,255,.82);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    padding: 22px;
+    transition: transform .25s ease;
+}
+.stats-band strong { display: block; font-size: 2rem; color: var(--green-dark); }
+.section-grid, .job-showcase, .how, .testimonials {
+    padding: clamp(48px, 8vw, 96px) clamp(18px, 6vw, 80px);
+}
+.section-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 32px; align-items: center; }
+.section-grid h2, .section-heading h2 { font-size: clamp(2rem, 4vw, 3.3rem); margin: 0 0 14px; }
+.feature-grid { grid-template-columns: repeat(2, 1fr); }
+.cards, .steps { grid-template-columns: repeat(3, 1fr); }
+.job-card:hover, .steps article:hover, .feature-grid article:hover { transform: translateY(-6px); }
+.job-card span { color: var(--green-dark); font-weight: 900; }
+.job-card h3 { font-size: 1.35rem; }
+.job-showcase {
+    background:
+        linear-gradient(rgba(255,255,255,.92), rgba(255,255,255,.92)),
+        url('https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1600&q=88') center/cover;
+}
+.how {
+    background:
+        linear-gradient(rgba(238,251,244,.92), rgba(238,251,244,.92)),
+        url('https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=1500&q=88') center/cover;
+}
+.steps b { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--green); color: white; }
+.testimonials { grid-template-columns: repeat(2, 1fr); }
+.footer { padding: 30px; text-align: center; background: #071f13; color: white; }
+@media (max-width: 860px) {
+    .stats-band, .section-grid, .cards, .steps, .testimonials, .feature-grid { grid-template-columns: 1fr; }
+    .hero { min-height: 68vh; }
+}

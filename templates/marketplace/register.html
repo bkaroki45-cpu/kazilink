@@ -1,0 +1,22 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Join KaziLink{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/auth.css' %}">{% endblock %}
+{% block content %}
+<main class="auth-page">
+    <section class="auth-visual">
+        <h1>Join one marketplace for work.</h1>
+        <p>Create one account. Post jobs, find jobs, chat, review, and discover nearby opportunities whenever you need.</p>
+    </section>
+    <form class="auth-card" method="post">
+        {% csrf_token %}
+        <h2>Create account</h2>
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <label>{{ field.label }}{{ field }}{{ field.errors }}</label>
+        {% endfor %}
+        <button class="btn primary" type="submit">Create Account</button>
+        <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+    </form>
+</main>
+{% endblock %}

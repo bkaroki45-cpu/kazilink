@@ -1,0 +1,45 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}KaziLink Feed{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/feed.css' %}">{% endblock %}
+{% block content %}
+<main class="social-layout">
+    <aside class="side-panel">
+        <a class="profile-mini" href="{% url 'profile_detail' user.username %}">
+            <span class="avatar">{{ user.username|first|upper }}</span>
+            <strong>{{ user.username }}</strong>
+            <small>Post jobs or find work</small>
+        </a>
+        <a href="{% url 'post_job' %}"><span class="nav-icon">+</span>Post a job</a>
+        <a href="{% url 'find_jobs' %}?nearby=1"><span class="nav-icon">⌖</span>Nearby jobs</a>
+        <a href="{% url 'notifications' %}"><span class="nav-icon">•</span>Notifications</a>
+        <a href="{% url 'inbox' %}"><span class="nav-icon">✉</span>Messages</a>
+    </aside>
+
+    <section class="feed-column" data-feed>
+        <div class="composer">
+            <span class="avatar">{{ user.username|first|upper }}</span>
+            <a href="{% url 'post_job' %}">Post a job for the community</a>
+            <a class="composer-action" href="{% url 'find_jobs' %}?nearby=1">Find work near me</a>
+        </div>
+
+        {% for job in page_obj %}
+            {% include 'marketplace/partials/job_card.html' with job=job saved_ids=saved_ids liked_ids=liked_ids %}
+        {% empty %}
+            <article class="empty-state"><h2>No open jobs yet.</h2><p>Employers can post the first opportunity from the Post Job page.</p></article>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <a class="load-more" href="?page={{ page_obj.next_page_number }}" data-next-page>Load more jobs</a>
+        {% endif %}
+    </section>
+
+    <aside class="side-panel trends">
+        <h3>Trending jobs</h3>
+        {% for job in trending %}
+            <a href="{{ job.get_absolute_url }}"><strong>{{ job.title }}</strong><small>{{ job.location }}</small></a>
+        {% endfor %}
+    </aside>
+</main>
+{% endblock %}
+{% block page_js %}<script src="{% static 'marketplace/js/feed.js' %}"></script>{% endblock %}

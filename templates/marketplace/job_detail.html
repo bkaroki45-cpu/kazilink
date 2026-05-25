@@ -1,0 +1,68 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}{{ job.title }} | KaziLink{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">{% endblock %}
+{% block content %}
+<main class="detail-layout">
+    <article class="job-detail">
+        {% if job.photo %}<img class="detail-media" src="{{ job.photo.url }}" alt="{{ job.title }}">{% endif %}
+        {% if job.video %}<video class="detail-media" controls src="{{ job.video.url }}"></video>{% endif %}
+        {% if job.audio %}<audio controls src="{{ job.audio.url }}"></audio>{% endif %}
+        <span class="tag">{{ job.get_job_type_display }}</span>
+        <h1>{{ job.title }}</h1>
+        <p>{{ job.description }}</p>
+        <div class="meta-grid">
+            <span>Location <b>{{ job.location }}</b></span>
+            <span>Category <b>{{ job.category }}</b></span>
+            <span>Salary <b>{% if job.salary %}KSh {{ job.salary }}{% else %}Negotiable{% endif %}</b></span>
+            <span>Status <b>{{ job.get_status_display }}</b></span>
+            <span>Skills <b>{{ job.required_skills|default:'Open' }}</b></span>
+            <span>Contact <b>{{ job.contact_information }}</b></span>
+        </div>
+        {% if map_url %}
+            <iframe class="detail-map" title="Job map" src="{{ map_url }}"></iframe>
+        {% endif %}
+        {% if job.document %}<a class="btn ghost" href="{{ job.document.url }}">Download document</a>{% endif %}
+        {% if user == job.employer %}
+            <form class="status-panel" method="post" action="{% url 'update_job_status' job.pk %}">
+                {% csrf_token %}
+                <label>Update job status
+                    <select name="status">
+                        {% for value,label in status_choices %}
+                            <option value="{{ value }}" {% if job.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <button class="btn primary">Save Status</button>
+                <small>When marked Taken or Closed, this job disappears from the public feed.</small>
+            </form>
+        {% endif %}
+        <div class="detail-actions">
+            <form method="post" action="{% url 'toggle_like' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_liked %}Liked{% else %}Like{% endif %}</button></form>
+            <form method="post" action="{% url 'toggle_save' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_saved %}Saved{% else %}Save{% endif %}</button></form>
+            <a class="btn ghost" href="{% url 'start_conversation' job.employer.username %}">Message Employer</a>
+        </div>
+    </article>
+    <aside class="apply-panel">
+        <a class="employer" href="{% url 'profile_detail' job.employer.username %}">
+            <span class="avatar">{{ job.employer.username|first|upper }}</span>
+            <strong>{{ job.employer.username }}</strong>
+            <small>{{ job.employer.profile.rating_average }} star rating</small>
+        </a>
+        {% if user != job.employer %}
+            <form method="post" action="{% url 'apply_job' job.pk %}">
+                {% csrf_token %}
+                {{ application_form.message }}
+                <button class="btn primary" {% if has_applied %}disabled{% endif %}>{% if has_applied %}Applied{% else %}Apply Now{% endif %}</button>
+            </form>
+        {% endif %}
+        <section class="comments">
+            <h2>Comments</h2>
+            <form method="post">{% csrf_token %}{{ comment_form.body }}<button class="btn mini">Comment</button></form>
+            {% for comment in job.comments.all %}
+                <p><strong>{{ comment.user.username }}</strong> {{ comment.body }}</p>
+            {% endfor %}
+        </section>
+    </aside>
+</main>
+{% endblock %}

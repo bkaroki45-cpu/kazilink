@@ -1,0 +1,28 @@
+<article class="feed-card">
+    <header>
+        <a class="avatar" href="{% url 'profile_detail' job.employer.username %}">{{ job.employer.username|first|upper }}</a>
+        <div>
+            <a class="author" href="{% url 'profile_detail' job.employer.username %}">{{ job.employer.username }}{% if job.employer.profile.verified %}<span class="verified">Verified</span>{% endif %}</a>
+            <small>{{ job.created_at|timesince }} ago · {{ job.location }} · {{ job.category }}</small>
+        </div>
+    </header>
+    {% if job.photo %}<img class="job-media" src="{{ job.photo.url }}" alt="{{ job.title }}">{% endif %}
+    {% if job.video %}<video class="job-media" controls src="{{ job.video.url }}"></video>{% endif %}
+    <div class="job-body">
+        <span class="tag">{{ job.get_job_type_display }}</span>
+        <h2><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h2>
+        <p>{{ job.description|truncatewords:34 }}</p>
+        <div class="meta-row">
+            {% if job.salary %}<span>KSh {{ job.salary }}</span>{% endif %}
+            <span>{{ job.required_skills|default:'Flexible skills' }}</span>
+            {% if job.deadline %}<span>Deadline {{ job.deadline }}</span>{% endif %}
+        </div>
+    </div>
+    <footer class="actions">
+        <form method="post" action="{% url 'toggle_like' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button title="Like"><span>♡</span>{% if job.id in liked_ids %}Liked{% else %}Like{% endif %}</button></form>
+        <form method="post" action="{% url 'toggle_save' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button title="Save"><span>▱</span>{% if job.id in saved_ids %}Saved{% else %}Save{% endif %}</button></form>
+        <a href="{{ job.get_absolute_url }}" title="Comment"><span>▣</span>Comment</a>
+        <a href="{% url 'start_conversation' job.employer.username %}" title="Message"><span>✉</span>Chat</a>
+        <button type="button" title="Share" data-share="{{ request.scheme }}://{{ request.get_host }}{{ job.get_absolute_url }}"><span>↗</span>Share</button>
+    </footer>
+</article>

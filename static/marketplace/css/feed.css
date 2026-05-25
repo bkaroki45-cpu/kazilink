@@ -1,0 +1,38 @@
+.social-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 710px) 300px;
+    gap: 22px;
+    padding: 24px clamp(14px, 4vw, 54px);
+    align-items: start;
+}
+.side-panel, .composer, .feed-card {
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.93);
+    backdrop-filter: blur(14px);
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+}
+.side-panel { position: sticky; top: 90px; display: grid; gap: 8px; padding: 16px; }
+.side-panel a { padding: 10px; border-radius: 8px; transition: background .2s ease, transform .2s ease; }
+.side-panel a:hover { background: var(--mint); transform: translateX(3px); }
+.profile-mini { display: grid; gap: 4px; }
+.feed-column { display: grid; gap: 18px; }
+.composer { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 16px; }
+.composer a { flex: 1; padding: 14px 16px; border-radius: 999px; background: #f1f7f4; color: var(--muted); }
+.composer .composer-action { background: var(--green); color: white; font-weight: 900; }
+.feed-card { overflow: hidden; transition: transform .2s ease, box-shadow .2s ease; }
+.feed-card:hover { transform: translateY(-3px); box-shadow: 0 24px 60px rgba(12,89,50,.16); }
+.feed-card header { display: flex; gap: 12px; align-items: center; padding: 16px; }
+.author { font-weight: 900; }
+.verified, .tag { display: inline-block; margin-left: 7px; padding: 4px 8px; background: var(--mint); color: var(--green-dark); border-radius: 999px; font-size: .76rem; font-weight: 900; }
+.job-media { width: 100%; max-height: 380px; object-fit: cover; display: block; }
+.job-body { padding: 0 16px 14px; }
+.job-body h2 { margin: 12px 0 8px; font-size: 1.45rem; }
+.meta-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.meta-row span { padding: 7px 10px; background: #f5faf7; border-radius: 999px; color: var(--muted); }
+.actions { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid var(--line); }
+.actions button, .actions a { display: inline-flex; align-items: center; justify-content: center; gap: 6px; background: transparent; border: 0; padding: 13px 8px; text-align: center; color: var(--green-dark); font-weight: 850; cursor: pointer; }
+.actions span { font-size: 1.15rem; }
+.load-more { text-align: center; padding: 14px; border: 1px solid var(--line); background: white; border-radius: 8px; color: var(--green-dark); font-weight: 900; }
+@media (max-width: 1080px) { .social-layout { grid-template-columns: minmax(0, 1fr); } .side-panel { position: static; } .trends { display: none; } }
+@media (max-width: 620px) { .actions { grid-template-columns: repeat(2, 1fr); } }

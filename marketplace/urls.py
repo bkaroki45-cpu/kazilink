@@ -1,0 +1,29 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path('', views.landing, name='landing'),
+    path('register/', views.register, name='register'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
+    path('feed/', views.feed, name='feed'),
+    path('jobs/post/', views.post_job, name='post_job'),
+    path('jobs/find/', views.find_jobs, name='find_jobs'),
+    path('jobs/<int:pk>/', views.job_detail, name='job_detail'),
+    path('jobs/<int:pk>/like/', views.toggle_like, name='toggle_like'),
+    path('jobs/<int:pk>/save/', views.toggle_save, name='toggle_save'),
+    path('jobs/<int:pk>/apply/', views.apply_job, name='apply_job'),
+    path('jobs/<int:pk>/status/', views.update_job_status, name='update_job_status'),
+    path('profiles/<str:username>/', views.profile_detail, name='profile_detail'),
+    path('profiles/edit/', views.edit_profile, name='edit_profile'),
+    path('profiles/<str:username>/review/', views.review_user, name='review_user'),
+    path('profiles/<str:username>/follow/', views.toggle_follow, name='toggle_follow'),
+    path('inbox/', views.inbox, name='inbox'),
+    path('chat/start/<str:username>/', views.start_conversation, name='start_conversation'),
+    path('chat/<int:conversation_id>/', views.chat_room, name='chat_room'),
+    path('api/chat/<int:conversation_id>/', views.chat_messages_api, name='chat_messages_api'),
+    path('notifications/', views.notifications, name='notifications'),
+    path('api/jobs/', views.jobs_api, name='jobs_api'),
+    path('api/location/', views.update_location, name='update_location'),
+]

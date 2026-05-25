@@ -1,0 +1,22 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Login | KaziLink{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/auth.css' %}">{% endblock %}
+{% block content %}
+<main class="auth-page compact">
+    <section class="auth-visual">
+        <h1>Welcome back.</h1>
+        <p>Your job feed, conversations, and applications are waiting.</p>
+    </section>
+    <form class="auth-card" method="post">
+        {% csrf_token %}
+        <h2>Login</h2>
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <label>{{ field.label }}{{ field }}{{ field.errors }}</label>
+        {% endfor %}
+        <button class="btn primary" type="submit">Login</button>
+        <p>New here? <a href="{% url 'register' %}">Create an account</a></p>
+    </form>
+</main>
+{% endblock %}

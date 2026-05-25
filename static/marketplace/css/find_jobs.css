@@ -1,0 +1,18 @@
+.search-page { display: grid; grid-template-columns: 330px minmax(0, 1fr); gap: 24px; padding: 24px clamp(14px, 5vw, 60px); }
+.filters, .result-card {
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.94);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+.filters { position: sticky; top: 90px; padding: 18px; display: grid; gap: 14px; }
+.filters form { display: grid; gap: 12px; }
+.range-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.results { display: grid; gap: 14px; }
+.result-card { display: grid; gap: 14px; padding: 20px; transition: transform .2s ease, border-color .2s ease; }
+.result-card:hover { transform: translateY(-3px); }
+.result-card:hover { border-color: rgba(0,166,81,.45); }
+.result-card span { color: var(--green-dark); font-weight: 900; }
+.result-card h2 { margin: 8px 0; }
+.result-card footer { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: space-between; }
+@media (max-width: 900px) { .search-page { grid-template-columns: 1fr; } .filters { position: static; } }
