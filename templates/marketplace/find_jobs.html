@@ -4,7 +4,7 @@
 {% block title %}Find Jobs | KaziLink{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/find_jobs.css' %}">
 {% endblock %}
 
@@ -44,7 +44,11 @@
 
             <div class="input-group">
                 <label>Location</label>
-                <input name="location" value="{{ filters.location }}" placeholder="e.g Nairobi">
+                <input name="location" value="{{ filters.location }}" placeholder="Search institution, landmark, road, ward..." autocomplete="off" data-location-search>
+                <div class="location-suggestions" data-location-suggestions hidden></div>
+                <input type="hidden" name="place" value="{{ filters.place|default:'' }}" data-place-name>
+                <input type="hidden" name="place_lat" value="{{ filters.place_lat|default:'' }}">
+                <input type="hidden" name="place_lng" value="{{ filters.place_lng|default:'' }}">
             </div>
 
             <div class="input-group">
@@ -83,6 +87,25 @@
             </button>
 
         </form>
+
+        <form class="alert-builder" method="post" action="{% url 'create_job_alert' %}">
+            {% csrf_token %}
+            <h2>Pin Job Alert</h2>
+            <p>Save this type of job and show matching posts in Alerts.</p>
+            {{ alert_form.keyword }}
+            {{ alert_form.category }}
+            {{ alert_form.job_type }}
+            {{ alert_form.location }}
+            <div class="location-suggestions" data-location-suggestions hidden></div>
+            {{ alert_form.latitude }}
+            {{ alert_form.longitude }}
+            {{ alert_form.radius_km }}
+            <div class="range-row">
+                {{ alert_form.salary_min }}
+                {{ alert_form.salary_max }}
+            </div>
+            <button class="btn primary full" type="submit">Save Alert</button>
+        </form>
     </aside>
 
     <!-- RESULTS -->
@@ -94,7 +117,7 @@
             <div class="map-toolbar">
                 <div>
                     <strong>Jobs Map View</strong>
-                    <small>Choose a job below to show its exact location and your position.</small>
+                    <small>Search schools, hospitals, wards, roads, towns, and landmarks. Zoom in for roads, buildings, and place labels.</small>
                 </div>
 
                 <button class="btn mini" type="button" data-detect-location data-nearby-target="reload">
@@ -102,11 +125,32 @@
                 </button>
             </div>
 
+            <form class="map-search" data-map-search-form>
+                <div class="map-search-field">
+                    <input
+                        type="search"
+                        data-map-search-input
+                        autocomplete="off"
+                        placeholder="Search location, institution, town..."
+                        value="{{ filters.place|default:'' }}"
+                    >
+                    <button class="btn mini" type="submit">Search</button>
+                </div>
+                <label>
+                    Radius
+                    <select data-map-radius name="radius">
+                        <option value="5" {% if filters.radius == '5' %}selected{% endif %}>5 km</option>
+                        <option value="10" {% if filters.radius == '10' or not filters.radius %}selected{% endif %}>10 km</option>
+                        <option value="20" {% if filters.radius == '20' %}selected{% endif %}>20 km</option>
+                        <option value="50" {% if filters.radius == '50' %}selected{% endif %}>50 km</option>
+                    </select>
+                </label>
+                <div class="map-search-results" data-map-search-results hidden></div>
+            </form>
+
             <div
                 id="jobs-map"
                 class="jobs-map"
-                data-user-lat="{{ user_latitude|default:'' }}"
-                data-user-lng="{{ user_longitude|default:'' }}"
             ></div>
 
         </div>
@@ -123,6 +167,9 @@
             >
 
                 <div class="card-top">
+                    {% if job.photo %}
+                        <img class="result-media" src="{{ job.photo.url }}" alt="{{ job.title }}">
+                    {% endif %}
                     <span class="badge">{{ job.get_job_type_display }}</span>
                     <h2>
                         <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
@@ -138,6 +185,7 @@
                         {% if job.distance is not None %}
                             <span class="distance">{{ job.distance }} km away</span>
                         {% endif %}
+                        <span class="distance" data-dynamic-distance></span>
                     </div>
 
                     <div class="actions">
@@ -145,7 +193,7 @@
                             <strong class="salary">KSh {{ job.salary }}</strong>
                         {% endif %}
 
-                        {% if job.latitude and job.longitude %}
+                        {% if job.map_point %}
                             <button class="btn mini map-job-btn" type="button" data-map-job="{{ job.id }}">Show on map</button>
                         {% else %}
                             <span class="map-missing">No GPS</span>
@@ -173,7 +221,7 @@
 {% endblock %}
 
 {% block page_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
 <script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
 <script src="{% static 'marketplace/js/search.js' %}"></script>

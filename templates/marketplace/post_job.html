@@ -4,6 +4,7 @@
 {% block title %}Post Job | KaziLink{% endblock %}
 
 {% block page_css %}
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">
 {% endblock %}
 
@@ -20,7 +21,7 @@
         </div>
 
         <button class="gps-btn" type="button" data-detect-location data-nearby-target="stay">
-            ⌖ Detect My Location
+            Use GPS for this job
         </button>
 
     </header>
@@ -79,6 +80,17 @@
 
                                 {{ field }}
 
+                                {% if field.name == 'location' %}
+                                    <div class="location-suggestions" data-location-suggestions hidden></div>
+                                    <button class="map-picker-toggle" type="button" data-map-picker-toggle>
+                                        Pick exact place on map
+                                    </button>
+                                    <div class="map-picker" data-map-picker hidden>
+                                        <div id="post-location-map"></div>
+                                        <small>Click the exact institution, road, building, or landmark to capture GPS coordinates.</small>
+                                    </div>
+                                {% endif %}
+
                                 {% if field.help_text %}
                                     <small>{{ field.help_text }}</small>
                                 {% endif %}
@@ -109,5 +121,6 @@
 {% endblock %}
 
 {% block page_js %}
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
 {% endblock %}

@@ -2,7 +2,7 @@ from django.contrib import admin
 
 from .models import (
     ActivityUpdate, Application, Category, Comment, Conversation, Follow, Job,
-    JobLike, Message, Notification, Profile, Review, SavedJob,
+    JobAlert, JobLike, Message, Notification, Profile, Review, SavedJob,
 )
 
 
@@ -32,6 +32,7 @@ class JobAdmin(admin.ModelAdmin):
 admin.site.register(Category)
 admin.site.register(JobLike)
 admin.site.register(SavedJob)
+admin.site.register(JobAlert)
 admin.site.register(Comment)
 admin.site.register(Application)
 admin.site.register(Conversation)

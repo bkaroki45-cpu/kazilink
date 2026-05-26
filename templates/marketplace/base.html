@@ -16,53 +16,65 @@
 </head>
 
 <body>
-
-    <!-- Background Layer -->
     <div class="bg-orb"></div>
 
-    <!-- APP SHELL -->
     <div class="app">
-
-        <!-- TOP NAV -->
         <header class="topbar">
-
             <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
                 <span class="brand-mark">K</span>
                 <span class="brand-name">KaziLink</span>
             </a>
 
+            <strong class="mobile-page-title">{% block mobile_title %}KaziLink{% endblock %}</strong>
+
             <button class="nav-toggle" data-nav-toggle aria-label="Toggle navigation">
-                ☰
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
 
             <nav class="nav-links" data-nav-links>
-
                 {% if user.is_authenticated %}
-
+                    <div class="drawer-profile">
+                        <span class="avatar">{{ user.username|first|upper }}</span>
+                        <div>
+                            <strong>{{ user.username }}</strong>
+                            <small>{{ user.profile.get_role_display|default:'KaziLink member' }}</small>
+                        </div>
+                    </div>
                     <a href="{% url 'feed' %}">Home</a>
                     <a href="{% url 'find_jobs' %}">Jobs</a>
                     <a href="{% url 'post_job' %}">Post</a>
+                    <a href="{% url 'find_jobs' %}?nearby=1">Nearby Jobs</a>
                     <a href="{% url 'inbox' %}">Messages</a>
-                    <a href="{% url 'notifications' %}">Alerts</a>
+                    <a class="alert-link" href="{% url 'notifications' %}">
+                        Alerts
+                        {% if alert_match_count %}
+                            <span class="alert-count">{{ alert_match_count }}</span>
+                        {% endif %}
+                    </a>
                     <a href="{% url 'profile_detail' user.username %}">Profile</a>
-
                     <a class="btn-danger" href="{% url 'logout' %}">Logout</a>
-
                 {% else %}
-
                     <a href="{% url 'landing' %}#jobs">Find Work</a>
                     <a href="{% url 'landing' %}#post">Hire Talent</a>
                     <a href="{% url 'login' %}">Login</a>
-
                     <a class="btn-primary" href="{% url 'register' %}">Get Started</a>
-
                 {% endif %}
-
             </nav>
-
         </header>
 
-        <!-- MESSAGES -->
+        {% if user.is_authenticated %}
+        <div class="drawer-backdrop" data-drawer-backdrop></div>
+        <nav class="bottom-nav" aria-label="Primary mobile navigation">
+            <a href="{% url 'feed' %}"><span>Home</span></a>
+            <a href="{% url 'find_jobs' %}"><span>Jobs</span></a>
+            <a class="bottom-post" href="{% url 'post_job' %}"><span>Post</span></a>
+            <a href="{% url 'inbox' %}"><span>Chat</span></a>
+            <a href="{% url 'profile_detail' user.username %}"><span>Profile</span></a>
+        </nav>
+        {% endif %}
+
         {% if messages %}
         <div class="toast-stack">
             {% for message in messages %}
@@ -71,15 +83,12 @@
         </div>
         {% endif %}
 
-        <!-- PAGE -->
         <main class="content">
             {% block content %}{% endblock %}
         </main>
-
     </div>
 
     <script src="{% static 'marketplace/js/main.js' %}"></script>
     {% block page_js %}{% endblock %}
-
 </body>
 </html>

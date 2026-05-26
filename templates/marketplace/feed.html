@@ -1,32 +1,62 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}KaziLink Feed{% endblock %}
+{% block mobile_title %}Home{% endblock %}
 {% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/feed.css' %}">{% endblock %}
+
 {% block content %}
 <main class="social-layout">
-    <aside class="side-panel">
-        <a class="profile-mini" href="{% url 'profile_detail' user.username %}">
-            <span class="avatar">{{ user.username|first|upper }}</span>
-            <strong>{{ user.username }}</strong>
-            <small>Post jobs or find work</small>
-        </a>
-        <a href="{% url 'post_job' %}"><span class="nav-icon">+</span>Post a job</a>
-        <a href="{% url 'find_jobs' %}?nearby=1"><span class="nav-icon">⌖</span>Nearby jobs</a>
-        <a href="{% url 'notifications' %}"><span class="nav-icon">•</span>Notifications</a>
-        <a href="{% url 'inbox' %}"><span class="nav-icon">✉</span>Messages</a>
+    <aside class="left-rail">
+        <section class="profile-card">
+            <a class="profile-avatar" href="{% url 'profile_detail' user.username %}">{{ user.username|first|upper }}</a>
+            <div>
+                <h2>{{ user.username }}</h2>
+                <p>{{ user.profile.location|default:'Ready to work across Kenya' }}</p>
+            </div>
+            <div class="profile-stats">
+                <span><strong>{{ alert_match_count|default:0 }}</strong>Alerts</span>
+                <span><strong>{{ user.profile.rating_average }}</strong>Rating</span>
+            </div>
+        </section>
+
+        <nav class="quick-links">
+            <a href="{% url 'post_job' %}"><span>+</span>Post a job</a>
+            <a href="{% url 'find_jobs' %}?nearby=1"><span>Near</span>Nearby jobs</a>
+            <a href="{% url 'notifications' %}"><span>{{ alert_match_count|default:0 }}</span>Job alerts</a>
+            <a href="{% url 'inbox' %}"><span>Msg</span>Messages</a>
+        </nav>
     </aside>
 
     <section class="feed-column" data-feed>
-        <div class="composer">
+        <section class="feed-hero">
+            <div>
+                <span class="eyebrow">Marketplace feed</span>
+                <h1>Find trusted work and local talent faster.</h1>
+                <p>Fresh jobs, nearby opportunities, and direct chat in one polished workspace.</p>
+            </div>
+            <a class="hero-cta" href="{% url 'find_jobs' %}">Explore jobs</a>
+        </section>
+
+        <section class="composer">
             <span class="avatar">{{ user.username|first|upper }}</span>
-            <a href="{% url 'post_job' %}">Post a job for the community</a>
-            <a class="composer-action" href="{% url 'find_jobs' %}?nearby=1">Find work near me</a>
-        </div>
+            <a class="composer-input" href="{% url 'post_job' %}">What work are you posting today?</a>
+            <div class="composer-actions">
+                <a href="{% url 'post_job' %}">Location</a>
+                <a href="{% url 'post_job' %}">Photo</a>
+                <a href="{% url 'post_job' %}">Budget</a>
+                <a class="composer-post" href="{% url 'post_job' %}">Post Job</a>
+            </div>
+        </section>
 
         {% for job in page_obj %}
             {% include 'marketplace/partials/job_card.html' with job=job saved_ids=saved_ids liked_ids=liked_ids %}
         {% empty %}
-            <article class="empty-state"><h2>No open jobs yet.</h2><p>Employers can post the first opportunity from the Post Job page.</p></article>
+            <article class="empty-state">
+                <h2>No open jobs yet.</h2>
+                <p>Employers can post the first opportunity from the Post Job page.</p>
+                <a class="hero-cta" href="{% url 'post_job' %}">Post a job</a>
+            </article>
         {% endfor %}
 
         {% if page_obj.has_next %}
@@ -34,12 +64,50 @@
         {% endif %}
     </section>
 
-    <aside class="side-panel trends">
-        <h3>Trending jobs</h3>
-        {% for job in trending %}
-            <a href="{{ job.get_absolute_url }}"><strong>{{ job.title }}</strong><small>{{ job.location }}</small></a>
-        {% endfor %}
+    <aside class="right-rail">
+        <section class="widget-card trending-card">
+            <div class="widget-title">
+                <span>Trending</span>
+                <strong>Hot jobs</strong>
+            </div>
+            {% for job in trending %}
+                <a class="trend-item" href="{{ job.get_absolute_url }}">
+                    <span>{{ forloop.counter }}</span>
+                    <div>
+                        <strong>{{ job.title }}</strong>
+                        <small>{{ job.location }}{% if job.salary %} - KSh {{ job.salary }}{% endif %}</small>
+                    </div>
+                </a>
+            {% empty %}
+                <p class="muted">Trending jobs will appear here once applications start coming in.</p>
+            {% endfor %}
+        </section>
+
+        <section class="widget-card">
+            <div class="widget-title">
+                <span>Shortcut</span>
+                <strong>Work near you</strong>
+            </div>
+            <p class="muted">Use your GPS to sort jobs by distance and view exact routes on the map.</p>
+            <a class="widget-button" href="{% url 'find_jobs' %}?nearby=1">Find nearby jobs</a>
+        </section>
+
+        <section class="widget-card category-card">
+            <div class="widget-title">
+                <span>Categories</span>
+                <strong>Popular work</strong>
+            </div>
+            <div class="category-pills">
+                <a href="{% url 'find_jobs' %}?job_type=immediate">Immediate</a>
+                <a href="{% url 'find_jobs' %}?job_type=part_time">Part-time</a>
+                <a href="{% url 'find_jobs' %}?job_type=professional">Professional</a>
+                <a href="{% url 'find_jobs' %}?job_type=freelance">Freelance</a>
+            </div>
+        </section>
     </aside>
+
+    <a class="feed-fab" href="{% url 'post_job' %}" aria-label="Post a job">+</a>
 </main>
 {% endblock %}
+
 {% block page_js %}<script src="{% static 'marketplace/js/feed.js' %}"></script>{% endblock %}

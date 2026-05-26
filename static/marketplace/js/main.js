@@ -1,8 +1,19 @@
 const navToggle = document.querySelector('[data-nav-toggle]');
 const navLinks = document.querySelector('[data-nav-links]');
+const drawerBackdrop = document.querySelector('[data-drawer-backdrop]');
 
 if (navToggle && navLinks) {
-    navToggle.addEventListener('click', () => navLinks.classList.toggle('open'));
+    const setDrawer = (open) => {
+        navLinks.classList.toggle('open', open);
+        drawerBackdrop?.classList.toggle('open', open);
+        navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+
+    navToggle.addEventListener('click', () => setDrawer(!navLinks.classList.contains('open')));
+    drawerBackdrop?.addEventListener('click', () => setDrawer(false));
+    navLinks.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setDrawer(false));
+    });
 }
 
 document.querySelectorAll('[data-share]').forEach((button) => {

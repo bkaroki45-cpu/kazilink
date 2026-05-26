@@ -5,6 +5,34 @@
 {% block content %}
 <main class="notifications-page">
     <h1>Notifications</h1>
+    <section class="alert-summary">
+        <div>
+            <strong>{{ alert_jobs|length }}</strong>
+            <span>open jobs match your pinned alerts</span>
+        </div>
+        <a class="btn mini" href="{% url 'find_jobs' %}">Edit alerts</a>
+    </section>
+    {% if job_alerts %}
+        <section class="pinned-alerts">
+            {% for alert in job_alerts %}
+                <article>
+                    <strong>{{ alert.keyword|default:'Any job' }}</strong>
+                    <span>{{ alert.location|default:'Any Kenya location' }} · {{ alert.get_job_type_display|default:'Any type' }} · {{ alert.radius_km }} km</span>
+                </article>
+            {% endfor %}
+        </section>
+    {% endif %}
+    {% if alert_jobs %}
+        <section class="notification-list">
+            {% for job in alert_jobs %}
+                <a class="notification alert-match" href="{{ job.get_absolute_url }}">
+                    <strong>{{ job.title }}</strong>
+                    <p>{{ job.location }} · {{ job.category }}{% if job.salary %} · KSh {{ job.salary }}{% endif %}</p>
+                    <small>Posted {{ job.created_at|timesince }} ago</small>
+                </a>
+            {% endfor %}
+        </section>
+    {% endif %}
     <section class="notification-list">
         {% for note in notifications %}
             <a class="notification {% if not note.read %}unread{% endif %}" href="{{ note.url|default:'#' }}">

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import ActivityUpdate, Application, Comment, Job, Message, Profile, Review
+from .models import ActivityUpdate, Application, Comment, Job, JobAlert, Message, Profile, Review
 
 
 class RegisterForm(UserCreationForm):
@@ -37,6 +37,11 @@ class JobForm(forms.ModelForm):
             'deadline': forms.DateInput(attrs={'type': 'date'}),
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
+            'location': forms.TextInput(attrs={
+                'autocomplete': 'off',
+                'data-location-search': '1',
+                'placeholder': 'Search institution, road, hospital, ward, town...',
+            }),
         }
 
 
@@ -47,6 +52,28 @@ class ProfileForm(forms.ModelForm):
         widgets = {
             'latitude': forms.HiddenInput(),
             'longitude': forms.HiddenInput(),
+        }
+
+
+class JobAlertForm(forms.ModelForm):
+    class Meta:
+        model = JobAlert
+        fields = [
+            'keyword', 'category', 'job_type', 'location', 'latitude', 'longitude',
+            'radius_km', 'salary_min', 'salary_max',
+        ]
+        widgets = {
+            'latitude': forms.HiddenInput(),
+            'longitude': forms.HiddenInput(),
+            'location': forms.TextInput(attrs={
+                'autocomplete': 'off',
+                'data-location-search': '1',
+                'placeholder': 'Institution, landmark, road, ward, town...',
+            }),
+            'radius_km': forms.Select(choices=((5, '5 km'), (10, '10 km'), (20, '20 km'), (50, '50 km'))),
+            'keyword': forms.TextInput(attrs={'placeholder': 'Title, skill, keyword'}),
+            'salary_min': forms.NumberInput(attrs={'placeholder': 'Minimum'}),
+            'salary_max': forms.NumberInput(attrs={'placeholder': 'Maximum'}),
         }
 
 

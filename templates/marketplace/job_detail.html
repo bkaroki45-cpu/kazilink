@@ -2,7 +2,7 @@
 {% load static %}
 {% block title %}{{ job.title }} | KaziLink{% endblock %}
 {% block page_css %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">
 {% endblock %}
 {% block content %}
@@ -26,8 +26,8 @@
             <section class="detail-map-panel">
                 <div class="map-toolbar">
                     <div>
-                        <strong>Aerial route map</strong>
-                        <small>Blue is you. Green is exactly where the job was posted.</small>
+                        <strong>Route map</strong>
+                        <small>Blue is you. Green is the job location{% if job_location_source %} ({{ job_location_source }}){% endif %}.</small>
                     </div>
                     <button class="btn mini" type="button" data-detect-location data-nearby-target="reload-current">Refresh GPS</button>
                 </div>
@@ -38,8 +38,6 @@
                     data-job-location="{{ job.location }}"
                     data-job-lat="{{ job_latitude }}"
                     data-job-lng="{{ job_longitude }}"
-                    data-user-lat="{{ user_latitude|default:'' }}"
-                    data-user-lng="{{ user_longitude|default:'' }}"
                 ></div>
             </section>
         {% endif %}
@@ -102,7 +100,7 @@
 </main>
 {% endblock %}
 {% block page_js %}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
 <script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
 {% endblock %}

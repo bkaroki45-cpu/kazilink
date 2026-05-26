@@ -85,6 +85,7 @@ class Job(models.Model):
     location = models.CharField(max_length=140)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    resolved_place_name = models.CharField(max_length=255, blank=True)
     deadline = models.DateField(null=True, blank=True)
     required_skills = models.CharField(max_length=255, blank=True)
     contact_information = models.CharField(max_length=160)
@@ -128,6 +129,27 @@ class SavedJob(models.Model):
 
     class Meta:
         unique_together = ('user', 'job')
+
+
+class JobAlert(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_alerts')
+    keyword = models.CharField(max_length=160, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='job_alerts')
+    job_type = models.CharField(max_length=30, choices=Job.TYPE_CHOICES, blank=True)
+    location = models.CharField(max_length=160, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    radius_km = models.PositiveIntegerField(default=20)
+    salary_min = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    salary_max = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.user.username} alert'
 
 
 class Comment(models.Model):

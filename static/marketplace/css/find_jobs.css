@@ -16,14 +16,25 @@
 .filters {
     position: sticky;
     top: 90px;
-    padding: 20px;
+    align-self: start;
+    z-index: 20;
+    padding: 22px;
     display: grid;
-    gap: 16px;
-    border-radius: 22px;
-    background: rgba(255,255,255,0.94);
-    backdrop-filter: blur(16px);
-    box-shadow: var(--shadow);
-    border: 1px solid rgba(0,196,106,0.12);
+    gap: 18px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.96);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 22px 58px rgba(15,29,23,0.12);
+    border: 1px solid rgba(0,196,106,0.16);
+    overflow: hidden;
+}
+
+.filters::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 4px;
+    background: linear-gradient(90deg, var(--green), #0f7cff);
 }
 
 .filters-header h1 {
@@ -39,33 +50,82 @@
 
 .filters form {
     display: grid;
-    gap: 14px;
+    gap: 15px;
+}
+
+.alert-builder {
+    display: grid;
+    gap: 10px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+}
+
+.alert-builder h2 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.alert-builder p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.4;
+}
+
+.alert-builder input,
+.alert-builder select {
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(15,29,23,0.14);
+    background: white;
 }
 
 .input-group {
+    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 7px;
 }
 
 .input-group label {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #333;
+    width: fit-content;
+    padding: 0 6px;
+    margin-left: 8px;
+    margin-bottom: -17px;
+    position: relative;
+    z-index: 1;
+    background: white;
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #435149;
 }
 
-input, select {
-    padding: 11px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(15,29,23,0.12);
+.filters input,
+.filters select {
+    width: 100%;
+    min-height: 46px;
+    padding: 15px 13px 11px;
+    border-radius: 13px;
+    border: 1px solid rgba(15,29,23,0.14);
     outline: none;
-    transition: 0.25s ease;
+    background: linear-gradient(180deg, #fff, #fbfdfc);
+    color: var(--ink);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     font-size: 0.95rem;
 }
 
-input:focus, select:focus {
+.filters input:hover,
+.filters select:hover {
+    border-color: rgba(0,196,106,0.32);
+}
+
+.filters input:focus,
+.filters select:focus {
     border-color: var(--green);
     box-shadow: 0 0 0 4px rgba(48,182,75,0.15);
+    background: white;
 }
 
 .range-row {
@@ -98,11 +158,13 @@ input:focus, select:focus {
 }
 
 .btn.ghost {
-    background: white;
-    border: 1px solid rgba(0,196,106,0.2);
+    min-height: 48px;
+    background: linear-gradient(180deg, #fff, #f7fffb);
+    border: 1px solid rgba(0,196,106,0.24);
     color: var(--green-dark);
-    padding: 10px;
-    border-radius: 12px;
+    padding: 11px 14px;
+    border-radius: 14px;
+    box-shadow: 0 10px 22px rgba(0,196,106,0.08);
 }
 
 /* =========================
@@ -118,7 +180,7 @@ input:focus, select:focus {
    MAP SECTION
 ========================= */
 .jobs-map-shell {
-    border-radius: 22px;
+    border-radius: 18px;
     overflow: hidden;
     background: white;
     box-shadow: var(--shadow);
@@ -153,6 +215,99 @@ input:focus, select:focus {
     background: #dfeee5;
     position: relative;
     z-index: 1;
+}
+
+.jobs-map .maplibregl-ctrl {
+    font-family: inherit;
+}
+
+.map-search {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    background: white;
+}
+
+.map-search-field {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+}
+
+.map-search input,
+.map-search select {
+    min-height: 42px;
+    border: 1px solid rgba(15,29,23,0.14);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    outline: none;
+}
+
+.map-search input {
+    width: 100%;
+    min-width: 0;
+    padding: 0 13px;
+}
+
+.map-search select {
+    padding: 0 34px 0 11px;
+}
+
+.map-search label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.84rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.map-search-results {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% - 8px);
+    left: 14px;
+    width: min(620px, calc(100% - 28px));
+    display: grid;
+    gap: 4px;
+    padding: 8px;
+    border: 1px solid rgba(15,29,23,0.12);
+    border-radius: 14px;
+    background: white;
+    box-shadow: 0 18px 44px rgba(0,0,0,0.16);
+}
+
+.map-search-results button {
+    display: grid;
+    gap: 2px;
+    width: 100%;
+    padding: 10px 12px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    text-align: left;
+    color: var(--ink);
+    cursor: pointer;
+}
+
+.map-search-results button:hover {
+    background: #f4fbf7;
+}
+
+.map-search-results span,
+.map-search-empty {
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.jobs-map .maplibregl-popup-content,
+.detail-map .maplibregl-popup-content {
+    line-height: 1.45;
 }
 
 .jobs-map::before {
@@ -199,6 +354,22 @@ input:focus, select:focus {
 }
 
 /* top section */
+.card-top {
+    display: grid;
+    gap: 10px;
+    min-width: 0;
+}
+
+.result-media {
+    width: 100%;
+    max-height: 240px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+    border-radius: 16px;
+    background: #eef4f0;
+}
+
 .badge {
     display: inline-block;
     padding: 5px 10px;
@@ -315,6 +486,14 @@ input:focus, select:focus {
         height: 45vh;
     }
 
+    .map-search {
+        grid-template-columns: 1fr;
+    }
+
+    .map-search label {
+        justify-content: space-between;
+    }
+
     .map-toolbar {
         flex-direction: column;
         align-items: flex-start;
@@ -348,5 +527,10 @@ input:focus, select:focus {
 
     .jobs-map {
         min-height: 300px;
+    }
+
+    .map-search-field {
+        display: grid;
+        grid-template-columns: 1fr;
     }
 }
