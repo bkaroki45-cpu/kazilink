@@ -1,0 +1,78 @@
+.edit-page {
+    min-height: calc(100vh - 70px);
+    display: grid;
+    place-items: center;
+    padding: 24px 12px 78px;
+    background:
+        radial-gradient(circle at 12% 0%, rgba(0,196,106,.14), transparent 30%),
+        linear-gradient(180deg, #f7fcf9 0%, #eef8f2 100%);
+}
+.edit-card {
+    width: min(760px, 100%);
+    display: grid;
+    gap: 14px;
+    padding: clamp(22px, 5vw, 42px);
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+.edit-head {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+}
+
+.edit-avatar {
+    width: 82px;
+    height: 82px;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 24px;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 900;
+    flex: 0 0 auto;
+}
+
+.edit-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.edit-card h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3rem); }
+.edit-card p { margin: 4px 0 0; color: var(--muted); }
+.edit-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.edit-fields label {
+    display: grid;
+    gap: 7px;
+    min-width: 0;
+    color: var(--text);
+    font-weight: 800;
+}
+
+.edit-fields label.wide { grid-column: 1 / -1; }
+.edit-card input,
+.edit-card select,
+.edit-card textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(15,29,23,.12);
+    border-radius: 14px;
+    min-width: 0;
+}
+
+@media (max-width: 680px) {
+    .edit-card { border-radius: 20px; }
+    .edit-fields { grid-template-columns: 1fr; }
+    .edit-head { align-items: flex-start; }
+}
