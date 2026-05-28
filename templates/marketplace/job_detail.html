@@ -2,7 +2,6 @@
 {% load static %}
 {% block title %}{{ job.title }} | KaziLink{% endblock %}
 {% block page_css %}
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">
 {% endblock %}
 {% block content %}
@@ -22,25 +21,6 @@
             <span>Skills <b>{{ job.required_skills|default:'Open' }}</b></span>
             <span>Contact <b>{{ job.contact_information }}</b></span>
         </div>
-        {% if job_latitude and job_longitude %}
-            <section class="detail-map-panel">
-                <div class="map-toolbar">
-                    <div>
-                        <strong>Route map</strong>
-                        <small>Blue is you. Green is the job location{% if job_location_source %} ({{ job_location_source }}){% endif %}.</small>
-                    </div>
-                    <button class="btn mini" type="button" data-detect-location data-nearby-target="reload-current">Refresh GPS</button>
-                </div>
-                <div
-                    id="job-detail-map"
-                    class="detail-map"
-                    data-job-title="{{ job.title }}"
-                    data-job-location="{{ job.location }}"
-                    data-job-lat="{{ job_latitude }}"
-                    data-job-lng="{{ job_longitude }}"
-                ></div>
-            </section>
-        {% endif %}
         {% if job.document %}<a class="btn ghost" href="{{ job.document.url }}">Download document</a>{% endif %}
         {% if user == job.employer %}
             <form class="status-panel" method="post" action="{% url 'update_job_status' job.pk %}">
@@ -66,12 +46,22 @@
         <div class="detail-actions">
             <form method="post" action="{% url 'toggle_like' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_liked %}Liked{% else %}Like{% endif %}</button></form>
             <form method="post" action="{% url 'toggle_save' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_saved %}Saved{% else %}Save{% endif %}</button></form>
-            <a class="btn ghost" href="{% url 'start_conversation' job.employer.username %}">Message Employer</a>
+            {% if user != job.employer %}
+                <a class="btn ghost" href="{% url 'start_conversation' job.employer.username %}">Message Employer</a>
+            {% else %}
+                <a class="btn ghost" href="{% url 'inbox' %}">Open Messages</a>
+            {% endif %}
         </div>
     </article>
     <aside class="apply-panel">
         <a class="employer" href="{% url 'profile_detail' job.employer.username %}">
-            <span class="avatar">{{ job.employer.username|first|upper }}</span>
+            <span class="avatar">
+                {% if job.employer.profile.avatar %}
+                    <img src="{{ job.employer.profile.avatar.url }}" alt="{{ job.employer.username }}">
+                {% else %}
+                    {{ job.employer.username|first|upper }}
+                {% endif %}
+            </span>
             <strong>{{ job.employer.username }}</strong>
             <small>{{ job.employer.profile.rating_average }} star rating</small>
         </a>
@@ -88,6 +78,31 @@
                 {{ application_form.message }}
                 <button class="btn primary" {% if has_applied %}disabled{% endif %}>{% if has_applied %}Applied{% else %}Apply Now{% endif %}</button>
             </form>
+        {% else %}
+            <section class="applications-panel">
+                <h2>Applications</h2>
+                {% for application in applications %}
+                    <article class="application-card">
+                        <a class="applicant" href="{% url 'profile_detail' application.applicant.username %}">
+                            <span class="avatar">
+                                {% if application.applicant.profile.avatar %}
+                                    <img src="{{ application.applicant.profile.avatar.url }}" alt="{{ application.applicant.username }}">
+                                {% else %}
+                                    {{ application.applicant.username|first|upper }}
+                                {% endif %}
+                            </span>
+                            <span>
+                                <strong>{{ application.applicant.username }}</strong>
+                                <small>{{ application.created_at|timesince }} ago</small>
+                            </span>
+                        </a>
+                        <p>{{ application.message|default:'No message added.' }}</p>
+                        <a class="btn ghost mini" href="{% url 'start_conversation' application.applicant.username %}">Message</a>
+                    </article>
+                {% empty %}
+                    <p class="empty">No applications yet.</p>
+                {% endfor %}
+            </section>
         {% endif %}
         <section class="comments">
             <h2>Comments</h2>
@@ -100,7 +115,5 @@
 </main>
 {% endblock %}
 {% block page_js %}
-<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
-<script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
 {% endblock %}

@@ -672,7 +672,7 @@ def find_jobs(request):
                     filtered_jobs.append(job)
             else:
                 job.distance = None
-        jobs = sorted(filtered_jobs, key=lambda item: item.distance)
+        jobs = sorted(filtered_jobs, key=lambda item: item.created_at, reverse=True)
     elif nearby and request.user.profile.latitude and request.user.profile.longitude:
         jobs = list(jobs)
         for job in jobs:
@@ -682,33 +682,14 @@ def find_jobs(request):
                 job.distance = round(distance_km(request.user.profile.latitude, request.user.profile.longitude, point['lat'], point['lng']), 1)
             else:
                 job.distance = None
-        jobs.sort(key=lambda item: item.distance if item.distance is not None else 999999)
+        jobs.sort(key=lambda item: item.created_at, reverse=True)
     elif sort == 'popular':
         jobs = jobs.annotate(app_count=Count('applications')).order_by('-app_count')
     else:
         jobs = jobs.order_by('-created_at')
 
-    map_jobs = []
-    for job in jobs:
-        point = ensure_job_coordinates(job)
-        job.map_point = point
-        if point:
-            map_jobs.append({
-                'id': job.id,
-                'title': job.title,
-                'location': job.location,
-                'salary': str(job.salary) if job.salary else '',
-                'lat': point['lat'],
-                'lng': point['lng'],
-                'source': point['source'],
-                'sourceLabel': point['label'],
-                'url': job.get_absolute_url(),
-                'distance': getattr(job, 'distance', None),
-            })
-
     return render(request, 'marketplace/find_jobs.html', {
         'jobs': jobs,
-        'map_jobs': map_jobs,
         'user_latitude': float(request.user.profile.latitude) if request.user.profile.latitude else None,
         'user_longitude': float(request.user.profile.longitude) if request.user.profile.longitude else None,
         'categories': Category.objects.all(),
@@ -793,10 +774,14 @@ def job_detail(request, pk):
     if request.user != job.employer:
         employer_followed = Follow.objects.filter(follower=request.user, followed=job.employer).exists()
     map_point = ensure_job_coordinates(job)
+    applications = []
+    if request.user == job.employer:
+        applications = job.applications.select_related('applicant', 'applicant__profile').order_by('-created_at')
     return render(request, 'marketplace/job_detail.html', {
         'job': job,
         'comment_form': CommentForm(),
         'application_form': ApplicationForm(),
+        'applications': applications,
         'has_applied': Application.objects.filter(job=job, applicant=request.user).exists(),
         'is_saved': SavedJob.objects.filter(job=job, user=request.user).exists(),
         'is_liked': JobLike.objects.filter(job=job, user=request.user).exists(),
@@ -829,6 +814,13 @@ def toggle_like(request, pk):
     like, created = JobLike.objects.get_or_create(user=request.user, job=job)
     if not created:
         like.delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        active = created
+        return JsonResponse({
+            'active': active,
+            'label': 'Liked' if active else 'Like',
+            'count': job.likes.count(),
+        })
     return redirect(request.POST.get('next') or 'feed')
 
 
@@ -839,6 +831,13 @@ def toggle_save(request, pk):
     saved, created = SavedJob.objects.get_or_create(user=request.user, job=job)
     if not created:
         saved.delete()
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        active = created
+        return JsonResponse({
+            'active': active,
+            'label': 'Saved' if active else 'Save',
+            'count': job.saves.count(),
+        })
     return redirect(request.POST.get('next') or 'feed')
 
 
@@ -897,6 +896,11 @@ def edit_profile(request):
 
 
 @login_required
+def settings_view(request):
+    return render(request, 'marketplace/settings.html')
+
+
+@login_required
 def review_user(request, username):
     reviewed = get_object_or_404(User, username=username)
     if request.method == 'POST' and reviewed != request.user:
@@ -926,13 +930,20 @@ def toggle_follow(request, username):
 @login_required
 def inbox(request):
     conversations = request.user.conversations.prefetch_related('participants', 'messages')
-    active = conversations.first()
-    return render(request, 'marketplace/inbox.html', {'conversations': conversations, 'active': active, 'message_form': MessageForm()})
+    conversation_list = list(conversations)
+    for conversation in conversation_list:
+        conversation.other_user = next((participant for participant in conversation.participants.all() if participant != request.user), None)
+        conversation.latest_message = conversation.messages.last()
+        conversation.unread_count = conversation.messages.filter(seen=False).exclude(sender=request.user).count()
+    return render(request, 'marketplace/inbox.html', {'conversations': conversation_list})
 
 
 @login_required
 def start_conversation(request, username):
     other = get_object_or_404(User, username=username)
+    if other == request.user:
+        messages.info(request, 'Open a job seeker profile or job post to message someone directly.')
+        return redirect('inbox')
     conversation = Conversation.objects.filter(participants=request.user).filter(participants=other).first()
     if not conversation:
         conversation = Conversation.objects.create()

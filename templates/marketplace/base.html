@@ -16,79 +16,155 @@
 </head>
 
 <body>
-    <div class="bg-orb"></div>
 
-    <div class="app">
-        <header class="topbar">
-            <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
-                <span class="brand-mark">K</span>
-                <span class="brand-name">KaziLink</span>
-            </a>
+<div class="app">
 
-            <strong class="mobile-page-title">{% block mobile_title %}KaziLink{% endblock %}</strong>
+    <!-- ===== TOP BAR ===== -->
+    <header class="topbar">
 
-            <button class="nav-toggle" data-nav-toggle aria-label="Toggle navigation">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+        <!-- Brand -->
+        <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
+            <span class="brand-mark">K</span>
+            <span class="brand-name">KaziLink</span>
+        </a>
 
-            <nav class="nav-links" data-nav-links>
-                {% if user.is_authenticated %}
-                    <div class="drawer-profile">
-                        <span class="avatar">{{ user.username|first|upper }}</span>
-                        <div>
-                            <strong>{{ user.username }}</strong>
-                            <small>{{ user.profile.get_role_display|default:'KaziLink member' }}</small>
-                        </div>
+        <!-- Mobile centred title (each page overrides via block) -->
+        <strong class="mobile-page-title">{% block mobile_title %}KaziLink{% endblock %}</strong>
+
+        <!-- Hamburger -->
+        <button class="nav-toggle" data-nav-toggle aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-nav">
+            <span></span><span></span><span></span>
+        </button>
+
+        <!-- Desktop nav / mobile drawer -->
+        <nav class="nav-links" data-nav-links id="main-nav">
+            {% if user.is_authenticated %}
+
+                <!-- Drawer profile (shown only on mobile) -->
+                <div class="drawer-profile">
+                    <span class="avatar">{{ user.username|first|upper }}</span>
+                    <div>
+                        <strong>{{ user.username }}</strong>
+                        <small>{{ user.profile.get_role_display|default:'KaziLink member' }}</small>
                     </div>
-                    <a href="{% url 'feed' %}">Home</a>
-                    <a href="{% url 'find_jobs' %}">Jobs</a>
-                    <a href="{% url 'post_job' %}">Post</a>
-                    <a href="{% url 'find_jobs' %}?nearby=1">Nearby Jobs</a>
-                    <a href="{% url 'inbox' %}">Messages</a>
-                    <a class="alert-link" href="{% url 'notifications' %}">
-                        Alerts
-                        {% if alert_match_count %}
-                            <span class="alert-count">{{ alert_match_count }}</span>
-                        {% endif %}
-                    </a>
-                    <a href="{% url 'profile_detail' user.username %}">Profile</a>
-                    <a class="btn-danger" href="{% url 'logout' %}">Logout</a>
-                {% else %}
-                    <a href="{% url 'landing' %}#jobs">Find Work</a>
-                    <a href="{% url 'landing' %}#post">Hire Talent</a>
-                    <a href="{% url 'login' %}">Login</a>
-                    <a class="btn-primary" href="{% url 'register' %}">Get Started</a>
-                {% endif %}
-            </nav>
-        </header>
+                </div>
 
-        {% if user.is_authenticated %}
-        <div class="drawer-backdrop" data-drawer-backdrop></div>
-        <nav class="bottom-nav" aria-label="Primary mobile navigation">
-            <a href="{% url 'feed' %}"><span>Home</span></a>
-            <a href="{% url 'find_jobs' %}"><span>Jobs</span></a>
-            <a class="bottom-post" href="{% url 'post_job' %}"><span>Post</span></a>
-            <a href="{% url 'inbox' %}"><span>Chat</span></a>
-            <a href="{% url 'profile_detail' user.username %}"><span>Profile</span></a>
+                <a href="{% url 'feed' %}">Home</a>
+                <a href="{% url 'find_jobs' %}">Jobs</a>
+                <a href="{% url 'post_job' %}">Post Job</a>
+                <a href="{% url 'inbox' %}">Messages</a>
+                <a href="{% url 'notifications' %}" class="nav-alert">
+                    Notifications
+                    {% if alert_match_count %}
+                        <span class="alert-count">{{ alert_match_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'settings' %}">Settings</a>
+                <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
+                    <span data-theme-icon>☀</span>
+                </button>
+                <div class="profile-menu" data-profile-menu>
+                    <button class="profile-trigger" type="button" aria-label="Open profile menu" aria-expanded="false" data-profile-toggle>
+                        <span class="avatar sm">{{ user.username|first|upper }}</span>
+                        <span class="profile-trigger-name">{{ user.username }}</span>
+                    </button>
+                    <div class="profile-dropdown" role="menu">
+                        <a href="{% url 'profile_detail' user.username %}" role="menuitem">Profile</a>
+                        <a href="{% url 'edit_profile' %}" role="menuitem">Edit Profile</a>
+                        <a class="drawer-duplicate" href="{% url 'settings' %}" role="menuitem">Settings</a>
+                        <a class="drawer-duplicate" href="{% url 'notifications' %}" role="menuitem">Notifications</a>
+                        <a class="desktop-profile-logout" href="{% url 'logout' %}" role="menuitem">Logout</a>
+                    </div>
+                </div>
+                <a class="btn-danger mobile-logout" href="{% url 'logout' %}">Logout</a>
+
+            {% else %}
+
+                <a href="{% url 'landing' %}#jobs">Find Work</a>
+                <a href="{% url 'landing' %}#post">Hire Talent</a>
+                <a href="{% url 'login' %}">Login</a>
+                <a class="btn btn-primary" href="{% url 'register' %}">Get Started</a>
+
+            {% endif %}
         </nav>
-        {% endif %}
+    </header>
 
-        {% if messages %}
-        <div class="toast-stack">
-            {% for message in messages %}
-                <div class="toast {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-        </div>
-        {% endif %}
+    <!-- Drawer backdrop (mobile) -->
+    {% if user.is_authenticated %}
+    <div class="drawer-backdrop" data-drawer-backdrop></div>
+    {% endif %}
 
-        <main class="content">
-            {% block content %}{% endblock %}
-        </main>
+    <!-- ===== BOTTOM NAV (mobile only) ===== -->
+    {% if user.is_authenticated %}
+    <nav class="bottom-nav" aria-label="Primary mobile navigation">
+
+        <a href="{% url 'feed' %}" data-nav-path="feed">
+            <!-- Home icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/>
+                <polyline points="9 21 9 13 15 13 15 21"/>
+            </svg>
+            <span>Home</span>
+        </a>
+
+        <a href="{% url 'find_jobs' %}" data-nav-path="jobs">
+            <!-- Briefcase icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2"/>
+                <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+                <line x1="12" y1="12" x2="12" y2="12"/>
+            </svg>
+            <span>Jobs</span>
+        </a>
+
+        <a class="bottom-post" href="{% url 'post_job' %}" data-nav-path="post">
+            <span>
+                <!-- Plus icon -->
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+            </span>
+        </a>
+
+        <a href="{% url 'inbox' %}" data-nav-path="inbox">
+            <!-- Chat icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Chat</span>
+        </a>
+
+        <a href="{% url 'profile_detail' user.username %}" data-nav-path="profile">
+            <!-- User icon -->
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Profile</span>
+        </a>
+
+    </nav>
+    {% endif %}
+
+    <!-- ===== DJANGO MESSAGES (toasts) ===== -->
+    {% if messages %}
+    <div class="toast-stack" id="toast-stack">
+        {% for message in messages %}
+            <div class="toast {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <script src="{% static 'marketplace/js/main.js' %}"></script>
-    {% block page_js %}{% endblock %}
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="content">
+        {% block content %}{% endblock %}
+    </main>
+
+</div><!-- /.app -->
+
+<script src="{% static 'marketplace/js/main.js' %}"></script>
+
+{% block page_js %}{% endblock %}
 </body>
 </html>

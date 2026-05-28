@@ -15,52 +15,91 @@
     <header class="chat-header">
 
         <div class="chat-user">
-            <h1>
+            <a class="chat-back" href="{% url 'inbox' %}" aria-label="Back to chats">
+                <span aria-hidden="true">←</span>
+            </a>
+
+            <div class="chat-avatar">
                 {% for participant in conversation.participants.all %}
-                    {% if participant != user %}{{ participant.username }}{% endif %}
+                    {% if participant != user %}
+                        {% if participant.profile.avatar %}
+                            <img src="{{ participant.profile.avatar.url }}" alt="{{ participant.username }}">
+                        {% else %}
+                            {{ participant.username|first|upper }}
+                        {% endif %}
+                    {% endif %}
                 {% endfor %}
-            </h1>
-
-            <div class="status">
-                <span class="online-dot"></span>
-                <small>Online • typing enabled</small>
             </div>
+
+            <div class="chat-meta">
+
+                <h1>
+                    {% for participant in conversation.participants.all %}
+                        {% if participant != user %}
+                            {{ participant.username }}
+                        {% endif %}
+                    {% endfor %}
+                </h1>
+
+                <div class="status">
+                    <span class="online-dot"></span>
+                    <span>Online now</span>
+                </div>
+
+            </div>
+
         </div>
-
-        <a class="btn ghost" href="{% url 'inbox' %}">
-            Inbox
-        </a>
-
     </header>
 
     <!-- MESSAGES -->
-    <section class="messages-pane" data-chat-pane data-chat-url="{% url 'chat_messages_api' conversation.id %}">
+    <section
+        class="messages-pane"
+        data-chat-pane
+        data-chat-url="{% url 'chat_messages_api' conversation.id %}"
+    >
 
         {% for message in conversation.messages.all %}
 
-            <article class="bubble {% if message.sender == user %}mine{% endif %}"
-                     data-message-id="{{ message.id }}">
+            <div class="message-row {% if message.sender == user %}mine{% endif %}">
 
-                <p>{{ message.body }}</p>
-
-                {% if message.image %}
-                    <img src="{{ message.image.url }}" alt="attachment">
+                {% if message.sender != user %}
+                    <div class="message-avatar">
+                        {{ message.sender.username|first|upper }}
+                    </div>
                 {% endif %}
 
-                {% if message.voice_note %}
-                    <audio controls src="{{ message.voice_note.url }}"></audio>
-                {% endif %}
+                <article class="bubble {% if message.sender == user %}mine{% endif %}"
+                         data-message-id="{{ message.id }}">
 
-                {% if message.attachment %}
-                    <a class="file-link" href="{{ message.attachment.url }}">⬇ Download file</a>
-                {% endif %}
+                    {% if message.body %}
+                        <p>{{ message.body }}</p>
+                    {% endif %}
 
-                <small>
-                    {{ message.created_at|time:"H:i" }}
-                    {% if message.seen and message.sender == user %} • Seen{% endif %}
-                </small>
+                    {% if message.image %}
+                        <img src="{{ message.image.url }}" alt="attachment">
+                    {% endif %}
 
-            </article>
+                    {% if message.voice_note %}
+                        <audio controls src="{{ message.voice_note.url }}"></audio>
+                    {% endif %}
+
+                    {% if message.attachment %}
+                        <a class="file-link" href="{{ message.attachment.url }}">
+                            📎 Download file
+                        </a>
+                    {% endif %}
+
+                    <small>
+                        {{ message.created_at|time:"H:i" }}
+
+                        {% if message.seen and message.sender == user %}
+                            • Seen
+                        {% endif %}
+                    </small>
+
+                </article>
+
+            </div>
 
         {% endfor %}
 
@@ -74,7 +113,9 @@
         <!-- ATTACHMENTS -->
         <div class="attachment-picker" data-attachment-picker>
 
-            <button class="attach-btn" type="button" data-attachment-toggle>
+            <button class="attach-btn"
+                    type="button"
+                    data-attachment-toggle>
                 +
             </button>
 
@@ -99,15 +140,17 @@
 
         </div>
 
-        <!-- TEXT -->
+        <!-- MESSAGE -->
         <div class="input-wrapper">
             {{ message_form.body }}
         </div>
 
-        <span class="attachment-name" data-attachment-name></span>
+        <span class="attachment-name"
+              data-attachment-name></span>
 
+        <!-- SEND -->
         <button class="send-btn" type="submit">
-            Send
+            ➤
         </button>
 
     </form>

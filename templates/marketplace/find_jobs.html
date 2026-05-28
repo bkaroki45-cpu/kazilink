@@ -2,159 +2,144 @@
 {% load static %}
 
 {% block title %}Find Jobs | KaziLink{% endblock %}
+{% block mobile_title %}Find Jobs{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/find_jobs.css' %}">
 {% endblock %}
 
 {% block content %}
-<main class="search-page">
+<div class="search-page">
 
-    <!-- FILTER SIDEBAR -->
-    <aside class="filters">
+    <!-- ===================== FILTER SIDEBAR ===================== -->
+    <aside class="filters" id="filter-panel">
 
-        <div class="filters-header">
-            <h1>Find Jobs</h1>
-            <p>Discover opportunities near you</p>
-        </div>
-
-        <button class="btn ghost gps-btn" type="button" data-detect-location data-nearby-target="reload">
-            Use GPS nearby
+        <!-- Mobile toggle (rendered outside the sidebar on mobile via JS) -->
+        <button class="filter-toggle-btn" id="filter-toggle" type="button" aria-expanded="false" aria-controls="filters-collapse">
+            <span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-3px;margin-right:7px;">
+                    <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="12" y1="18" x2="20" y2="18"/>
+                </svg>
+                Filters &amp; Alerts
+            </span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+            </svg>
         </button>
 
-        <form method="get" data-filter-form>
+        <!-- Collapsible wrapper (always visible on desktop) -->
+        <div class="filters-collapse" id="filters-collapse">
 
-            <div class="input-group">
-                <label>Keyword</label>
-                <input name="q" value="{{ filters.q }}" placeholder="Title, skill, keyword">
+            <div class="filters-header">
+                <h1>Find Jobs</h1>
+                <p>Discover opportunities near you</p>
             </div>
 
-            <div class="input-group">
-                <label>Category</label>
-                <select name="category">
-                    <option value="">All categories</option>
-                    {% for category in categories %}
-                        <option value="{{ category.id }}" {% if filters.category == category.id|stringformat:'s' %}selected{% endif %}>
-                            {{ category.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="input-group">
-                <label>Location</label>
-                <input name="location" value="{{ filters.location }}" placeholder="Search institution, landmark, road, ward..." autocomplete="off" data-location-search>
-                <div class="location-suggestions" data-location-suggestions hidden></div>
-                <input type="hidden" name="place" value="{{ filters.place|default:'' }}" data-place-name>
-                <input type="hidden" name="place_lat" value="{{ filters.place_lat|default:'' }}">
-                <input type="hidden" name="place_lng" value="{{ filters.place_lng|default:'' }}">
-            </div>
-
-            <div class="input-group">
-                <label>Job type</label>
-                <select name="job_type">
-                    <option value="">Any type</option>
-                    {% for value,label in job_types %}
-                        <option value="{{ value }}" {% if filters.job_type == value %}selected{% endif %}>
-                            {{ label }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="range-row">
-                <div class="input-group">
-                    <label>Min salary</label>
-                    <input name="salary_min" value="{{ filters.salary_min }}">
-                </div>
-                <div class="input-group">
-                    <label>Max salary</label>
-                    <input name="salary_max" value="{{ filters.salary_max }}">
-                </div>
-            </div>
-
-            <div class="input-group">
-                <label>Sort by</label>
-                <select name="sort">
-                    <option value="latest">Latest jobs</option>
-                    <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Most applied</option>
-                </select>
-            </div>
-
-            <button class="btn primary full" type="submit">
-                Search Jobs
+            <button class="btn ghost gps-btn" type="button" data-detect-location data-nearby-target="reload">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+                </svg>
+                Use GPS nearby
             </button>
 
-        </form>
+            <!-- Search filters -->
+            <form method="get" data-filter-form>
 
-        <form class="alert-builder" method="post" action="{% url 'create_job_alert' %}">
-            {% csrf_token %}
-            <h2>Pin Job Alert</h2>
-            <p>Save this type of job and show matching posts in Alerts.</p>
-            {{ alert_form.keyword }}
-            {{ alert_form.category }}
-            {{ alert_form.job_type }}
-            {{ alert_form.location }}
-            <div class="location-suggestions" data-location-suggestions hidden></div>
-            {{ alert_form.latitude }}
-            {{ alert_form.longitude }}
-            {{ alert_form.radius_km }}
-            <div class="range-row">
-                {{ alert_form.salary_min }}
-                {{ alert_form.salary_max }}
-            </div>
-            <button class="btn primary full" type="submit">Save Alert</button>
-        </form>
-    </aside>
-
-    <!-- RESULTS -->
-    <section class="results">
-
-        <!-- MAP -->
-        <div class="jobs-map-shell">
-
-            <div class="map-toolbar">
-                <div>
-                    <strong>Jobs Map View</strong>
-                    <small>Search schools, hospitals, wards, roads, towns, and landmarks. Zoom in for roads, buildings, and place labels.</small>
+                <div class="input-group">
+                    <label for="id_q">Keyword</label>
+                    <input id="id_q" name="q" value="{{ filters.q }}" placeholder="Title, skill, keyword…">
                 </div>
 
-                <button class="btn mini" type="button" data-detect-location data-nearby-target="reload">
-                    Use my GPS
-                </button>
-            </div>
-
-            <form class="map-search" data-map-search-form>
-                <div class="map-search-field">
-                    <input
-                        type="search"
-                        data-map-search-input
-                        autocomplete="off"
-                        placeholder="Search location, institution, town..."
-                        value="{{ filters.place|default:'' }}"
-                    >
-                    <button class="btn mini" type="submit">Search</button>
-                </div>
-                <label>
-                    Radius
-                    <select data-map-radius name="radius">
-                        <option value="5" {% if filters.radius == '5' %}selected{% endif %}>5 km</option>
-                        <option value="10" {% if filters.radius == '10' or not filters.radius %}selected{% endif %}>10 km</option>
-                        <option value="20" {% if filters.radius == '20' %}selected{% endif %}>20 km</option>
-                        <option value="50" {% if filters.radius == '50' %}selected{% endif %}>50 km</option>
+                <div class="input-group">
+                    <label for="id_category">Category</label>
+                    <select id="id_category" name="category">
+                        <option value="">All categories</option>
+                        {% for category in categories %}
+                            <option value="{{ category.id }}" {% if filters.category == category.id|stringformat:'s' %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                        {% endfor %}
                     </select>
-                </label>
-                <div class="map-search-results" data-map-search-results hidden></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="id_location">Location</label>
+                    <input id="id_location" name="location" value="{{ filters.location }}" placeholder="School, landmark, ward, road…" autocomplete="off" data-location-search>
+                    <div class="location-suggestions" data-location-suggestions hidden></div>
+                    <input type="hidden" name="place" value="{{ filters.place|default:'' }}" data-place-name>
+                    <input type="hidden" name="place_lat" value="{{ filters.place_lat|default:'' }}">
+                    <input type="hidden" name="place_lng" value="{{ filters.place_lng|default:'' }}">
+                </div>
+
+                <div class="input-group">
+                    <label for="id_job_type">Job type</label>
+                    <select id="id_job_type" name="job_type">
+                        <option value="">Any type</option>
+                        {% for value,label in job_types %}
+                            <option value="{{ value }}" {% if filters.job_type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="range-row">
+                    <div class="input-group">
+                        <label>Min (KSh)</label>
+                        <input name="salary_min" value="{{ filters.salary_min }}" placeholder="0">
+                    </div>
+                    <div class="input-group">
+                        <label>Max (KSh)</label>
+                        <input name="salary_max" value="{{ filters.salary_max }}" placeholder="Any">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="id_sort">Sort by</label>
+                    <select id="id_sort" name="sort">
+                        <option value="latest">Latest jobs</option>
+                        <option value="popular" {% if filters.sort == 'popular' %}selected{% endif %}>Most applied</option>
+                    </select>
+                </div>
+
+                <button class="btn primary full" type="submit">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    Search Jobs
+                </button>
+
             </form>
 
-            <div
-                id="jobs-map"
-                class="jobs-map"
-            ></div>
+            <!-- Pin alert -->
+            <form class="alert-builder" method="post" action="{% url 'create_job_alert' %}">
+                {% csrf_token %}
+                <h2>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:5px;color:var(--green);">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    Pin Job Alert
+                </h2>
+                <p>Save this search and get notified when matching jobs appear.</p>
+                {{ alert_form.keyword }}
+                {{ alert_form.category }}
+                {{ alert_form.job_type }}
+                {{ alert_form.location }}
+                <div class="location-suggestions" data-location-suggestions hidden></div>
+                {{ alert_form.latitude }}
+                {{ alert_form.longitude }}
+                {{ alert_form.radius_km }}
+                <div class="range-row">
+                    {{ alert_form.salary_min }}
+                    {{ alert_form.salary_max }}
+                </div>
+                <button class="btn primary full" type="submit">Save Alert</button>
+            </form>
 
-        </div>
+        </div><!-- /filters-collapse -->
 
+    </aside>
+
+    <!-- ===================== RESULTS ===================== -->
+    <section class="results">
         <!-- JOB LIST -->
         <div class="results-list">
 
@@ -165,64 +150,105 @@
                 data-location="{{ job.location|lower }}"
                 data-job-card="{{ job.id }}"
             >
-
                 <div class="card-top">
                     {% if job.photo %}
-                        <img class="result-media" src="{{ job.photo.url }}" alt="{{ job.title }}">
+                        <img class="result-media" src="{{ job.photo.url }}" alt="{{ job.title }}" loading="lazy">
                     {% endif %}
-                    <span class="badge">{{ job.get_job_type_display }}</span>
-                    <h2>
-                        <a href="{{ job.get_absolute_url }}">{{ job.title }}</a>
-                    </h2>
-                    <p>{{ job.description|truncatewords:26 }}</p>
+
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="badge">{{ job.get_job_type_display }}</span>
+                        {% if job.category %}
+                            <span class="badge" style="background:#e8f0ff;color:#2356c2;">{{ job.category }}</span>
+                        {% endif %}
+                    </div>
+
+                    <h2><a href="{{ job.get_absolute_url }}">{{ job.title }}</a></h2>
+                    <p>{{ job.description|truncatewords:28 }} <a class="read-more" href="{{ job.get_absolute_url }}">See more</a></p>
                 </div>
 
                 <div class="card-bottom">
                     <div class="meta">
-                        <span>{{ job.location }}</span>
-                        <span>{{ job.category }}</span>
-
+                        {% if job.location %}
+                            <span>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-1px;margin-right:3px;">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/>
+                                </svg>
+                                {{ job.location }}
+                            </span>
+                        {% endif %}
                         {% if job.distance is not None %}
                             <span class="distance">{{ job.distance }} km away</span>
                         {% endif %}
-                        <span class="distance" data-dynamic-distance></span>
+                        <span class="distance" data-dynamic-distance hidden></span>
                     </div>
 
                     <div class="actions">
                         {% if job.salary %}
-                            <strong class="salary">KSh {{ job.salary }}</strong>
+                            <strong class="salary">KSh {{ job.salary|floatformat:"0" }}</strong>
                         {% endif %}
-
-                        {% if job.map_point %}
-                            <button class="btn mini map-job-btn" type="button" data-map-job="{{ job.id }}">Show on map</button>
-                        {% else %}
-                            <span class="map-missing">No GPS</span>
-                        {% endif %}
-
-                        <a class="btn mini" href="{{ job.get_absolute_url }}">View</a>
+                        <a class="btn mini" href="{{ job.get_absolute_url }}">
+                            View
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="9 18 15 12 9 6"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
 
             </article>
             {% empty %}
             <article class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="rgba(0,196,106,0.4)" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
                 <h2>No jobs found</h2>
-                <p>Try adjusting filters or expanding your search area.</p>
+                <p>Try adjusting your filters or expanding the search area.</p>
             </article>
             {% endfor %}
 
-        </div>
+        </div><!-- /results-list -->
 
     </section>
 
-</main>
+</div><!-- /search-page -->
 
-{{ map_jobs|json_script:"jobs-map-data" }}
 {% endblock %}
 
 {% block page_js %}
-<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
-<script src="{% static 'marketplace/js/jobs_map.js' %}"></script>
 <script src="{% static 'marketplace/js/search.js' %}"></script>
+<script>
+/* ---- Mobile filter accordion ---- */
+(function () {
+    const btn      = document.getElementById('filter-toggle');
+    const collapse = document.getElementById('filters-collapse');
+    if (!btn || !collapse) return;
+
+    function isMobile() { return window.innerWidth <= 760; }
+
+    function apply() {
+        if (!isMobile()) {
+            collapse.classList.add('open');
+            collapse.style.display = '';
+            btn.style.display = 'none';
+            return;
+        }
+        btn.style.display = 'flex';
+        if (!collapse.classList.contains('open')) {
+            collapse.style.display = 'none';
+        }
+    }
+
+    btn.addEventListener('click', function () {
+        const open = collapse.classList.toggle('open');
+        collapse.style.display = open ? '' : 'none';
+        btn.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open);
+    });
+
+    apply();
+    window.addEventListener('resize', apply);
+})();
+</script>
 {% endblock %}
+

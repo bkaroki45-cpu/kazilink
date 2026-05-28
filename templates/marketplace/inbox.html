@@ -1,31 +1,38 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
+
 {% block title %}Inbox | KaziLink{% endblock %}
+{% block mobile_title %}Inbox{% endblock %}
 {% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/inbox.css' %}">{% endblock %}
+
 {% block content %}
-<main class="inbox-layout">
-    <aside class="conversation-list">
-        <h1>Inbox</h1>
+<main class="inbox-page">
+    <section class="conversation-list">
+        <div class="inbox-head">
+            <h1>Inbox</h1>
+            <span>{{ conversations|length }} chats</span>
+        </div>
+
         {% for conversation in conversations %}
-            <a href="{% url 'chat_room' conversation.id %}">
-                <strong>{% for participant in conversation.participants.all %}{% if participant != user %}{{ participant.username }}{% endif %}{% endfor %}</strong>
-                <small>{{ conversation.messages.last.body|default:'Shared files and messages' }}</small>
+            <a class="conversation-item {% if conversation.unread_count %}is-unread{% endif %}" href="{% url 'chat_room' conversation.id %}">
+                <span class="chat-avatar">
+                    {% if conversation.other_user.profile.avatar %}
+                        <img src="{{ conversation.other_user.profile.avatar.url }}" alt="{{ conversation.other_user.username }}">
+                    {% else %}
+                        {{ conversation.other_user.username|first|upper }}
+                    {% endif %}
+                </span>
+                <span class="chat-copy">
+                    <strong>{{ conversation.other_user.username }}</strong>
+                    <small>{{ conversation.latest_message.body|default:'Shared files and messages' }}</small>
+                </span>
+                {% if conversation.unread_count %}
+                    <span class="unread-badge">{{ conversation.unread_count }}</span>
+                {% endif %}
             </a>
         {% empty %}
-            <p>No conversations yet. Start one from a job post or profile.</p>
+            <p class="empty-inbox">No conversations yet. Start one from a job post or profile.</p>
         {% endfor %}
-    </aside>
-    <section class="chat-preview">
-        {% if active %}
-            <h2>Latest conversation</h2>
-            {% for message in active.messages.all|slice:":6" %}
-                <p class="{% if message.sender == user %}mine{% endif %}">{{ message.body|default:'Attachment' }}</p>
-            {% endfor %}
-            <a class="btn primary" href="{% url 'chat_room' active.id %}">Open Chat</a>
-        {% else %}
-            <h2>Modern messaging is ready.</h2>
-            <p>Chat supports text, images, files, voice notes, seen status, and profile previews.</p>
-        {% endif %}
     </section>
 </main>
 {% endblock %}

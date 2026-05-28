@@ -6,8 +6,32 @@
 <main class="edit-page">
     <form class="edit-card" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <h1>Edit profile</h1>
-        {% for field in form %}{% if field.is_hidden %}{{ field }}{% else %}<label>{{ field.label }}{{ field }}{{ field.errors }}</label>{% endif %}{% endfor %}
+        <div class="edit-head">
+            <div class="edit-avatar">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <span>{{ user.username|first|upper }}</span>
+                {% endif %}
+            </div>
+            <div>
+                <h1>Edit profile</h1>
+                <p>{{ user.followers.count }} followers · {{ user.following.count }} following</p>
+            </div>
+        </div>
+        <div class="edit-fields">
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                    <label class="{% if field.name == 'bio' or field.name == 'skills' %}wide{% endif %}">
+                        <span>{{ field.label }}</span>
+                        {{ field }}
+                        {{ field.errors }}
+                    </label>
+                {% endif %}
+            {% endfor %}
+        </div>
         <button class="btn primary">Save Profile</button>
     </form>
 </main>

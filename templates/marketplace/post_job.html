@@ -1,10 +1,11 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}Post Job | KaziLink{% endblock %}
+{% block title %}
+Post Job | KaziLink
+{% endblock %}
 
 {% block page_css %}
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.css">
 <link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">
 {% endblock %}
 
@@ -12,100 +13,146 @@
 
 <main class="job-page">
 
-    <!-- TOP HEADER -->
+    <!-- =========================
+         HEADER
+    ========================== -->
     <header class="page-header">
 
         <div>
             <h1>Post a Job</h1>
-            <p>Create a new opportunity and connect with skilled talent instantly.</p>
+
+            <p>
+                Reach trusted workers near you, share exact job locations,
+                and hire faster with KaziLink.
+            </p>
         </div>
 
-        <button class="gps-btn" type="button" data-detect-location data-nearby-target="stay">
-            Use GPS for this job
+        <button
+            class="gps-btn"
+            type="button"
+            data-detect-location
+            data-nearby-target="stay"
+        >
+            📍 Use GPS for this Job
         </button>
 
     </header>
 
-    <!-- MAIN GRID -->
+    <!-- =========================
+         MAIN GRID
+    ========================== -->
     <section class="job-grid">
 
-        <!-- LEFT INFO PANEL -->
+        <!-- =========================
+             INFO SIDEBAR
+        ========================== -->
         <aside class="info-panel">
 
-            <h2>How it works</h2>
-
-            <div class="info-card">
-                <h3>1. Add details</h3>
-                <p>Describe the job clearly so workers understand requirements.</p>
+            <div>
+                <h2>How KaziLink Works</h2>
             </div>
 
             <div class="info-card">
-                <h3>2. Set location</h3>
-                <p>GPS helps nearby workers discover your job faster.</p>
+                <h3>📝 Add Clear Details</h3>
+                <p>
+                    Describe the work, skills required,
+                    budget, and deadlines clearly.
+                </p>
             </div>
 
             <div class="info-card">
-                <h3>3. Publish</h3>
-                <p>Your job becomes visible instantly on KaziLink.</p>
+                <h3>📍 Set Exact Location</h3>
+                <p>
+                    Workers near institutions, roads,
+                    estates, and landmarks will discover it faster.
+                </p>
             </div>
 
-            <div id="map-preview">
-                <span>Location preview will appear here</span>
+            <div class="info-card">
+                <h3>🚀 Publish Instantly</h3>
+                <p>
+                    Your job becomes visible immediately
+                    across the KaziLink marketplace feed.
+                </p>
             </div>
 
         </aside>
 
-        <!-- FORM PANEL -->
+        <!-- =========================
+             FORM PANEL
+        ========================== -->
         <section class="form-panel">
 
-            <form class="job-form" method="post" enctype="multipart/form-data">
+            <form
+                class="job-form"
+                method="post"
+                enctype="multipart/form-data"
+            >
 
                 {% csrf_token %}
 
+                <!-- FORM TITLE -->
                 <div class="form-title">
-                    <h2>Job Details</h2>
-                    <p>Fill all required fields</p>
+
+                    <h2>Create Opportunity</h2>
+
+                    <p>
+                        Fill in all required details
+                        so workers can understand your job quickly.
+                    </p>
+
                 </div>
 
+                <!-- FORM BODY -->
                 <div class="form-body">
 
                     {% for field in form %}
 
                         {% if field.is_hidden %}
-                            {{ field }}
-                        {% else %}
-                            <div class="field">
 
-                                <label>{{ field.label }}</label>
+                            {{ field }}
+
+                        {% else %}
+
+                            <div class="field {% if field.name == 'description' %}full{% endif %}">
+
+                                <label for="{{ field.id_for_label }}">
+                                    {{ field.label }}
+                                </label>
 
                                 {{ field }}
 
+                                <!-- LOCATION EXTRAS -->
                                 {% if field.name == 'location' %}
-                                    <div class="location-suggestions" data-location-suggestions hidden></div>
-                                    <button class="map-picker-toggle" type="button" data-map-picker-toggle>
-                                        Pick exact place on map
-                                    </button>
-                                    <div class="map-picker" data-map-picker hidden>
-                                        <div id="post-location-map"></div>
-                                        <small>Click the exact institution, road, building, or landmark to capture GPS coordinates.</small>
-                                    </div>
+
+                                    <div
+                                        class="location-suggestions"
+                                        data-location-suggestions
+                                        hidden
+                                    ></div>
                                 {% endif %}
 
+                                <!-- HELP TEXT -->
                                 {% if field.help_text %}
                                     <small>{{ field.help_text }}</small>
                                 {% endif %}
 
-                                <div class="error">
-                                    {{ field.errors }}
-                                </div>
+                                <!-- ERRORS -->
+                                {% if field.errors %}
+                                    <div class="error">
+                                        {{ field.errors }}
+                                    </div>
+                                {% endif %}
 
                             </div>
+
                         {% endif %}
 
                     {% endfor %}
 
                 </div>
 
+                <!-- SUBMIT -->
                 <button class="submit-btn" type="submit">
                     Publish Job
                 </button>
@@ -121,6 +168,6 @@
 {% endblock %}
 
 {% block page_js %}
-<script src="https://unpkg.com/maplibre-gl@5.6.1/dist/maplibre-gl.js"></script>
 <script src="{% static 'marketplace/js/location.js' %}"></script>
 {% endblock %}
+

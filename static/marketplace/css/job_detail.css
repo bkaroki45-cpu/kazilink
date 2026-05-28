@@ -71,6 +71,16 @@
 .status-panel small { grid-column: 1 / -1; color: var(--muted); }
 .quick-status { margin: -8px 0 18px; }
 .employer { display: grid; gap: 6px; margin-bottom: 16px; color: var(--text); }
+.employer .avatar,
+.applicant .avatar {
+    overflow: hidden;
+}
+.employer .avatar img,
+.applicant .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 .follow-inline { margin: -4px 0 16px; }
 .apply-panel form, .comments { display: grid; gap: 12px; }
 .apply-panel textarea,
@@ -85,6 +95,40 @@
 }
 .status-panel select { min-height: 46px; }
 .comments p { padding: 12px; background: #f6fbf8; border-radius: 14px; color: var(--muted); }
+.applications-panel {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+.applications-panel h2 {
+    margin: 0;
+}
+.application-card {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: #f8fffb;
+}
+.applicant {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text);
+}
+.applicant strong,
+.applicant small {
+    display: block;
+}
+.applicant small,
+.application-card p,
+.empty {
+    color: var(--muted);
+}
+.application-card p {
+    margin: 0;
+}
 @media (max-width: 940px) {
     .detail-layout { grid-template-columns: 1fr; }
     .apply-panel { position: static; }

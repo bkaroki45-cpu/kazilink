@@ -8,7 +8,7 @@
     align-items: start;
     width: min(1420px, 100%);
     margin: 0 auto;
-    padding: 22px clamp(16px, 3vw, 34px) 48px;
+    padding: 22px clamp(16px, 3vw, 34px) 24px;
     background:
         radial-gradient(circle at 18% 0%, rgba(22, 196, 127, 0.12), transparent 28%),
         radial-gradient(circle at 85% 12%, rgba(34, 197, 94, 0.08), transparent 26%),
@@ -225,7 +225,12 @@
 
 .feed-card {
     overflow: hidden;
+    border-left: 5px solid rgba(22, 196, 127, 0.55);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.feed-card:nth-of-type(even) {
+    border-left-color: rgba(15, 98, 196, 0.34);
 }
 
 .feed-card:hover {
@@ -255,7 +260,7 @@
 .author {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     color: #0f291d;
     font-weight: 900;
 }
@@ -385,6 +390,55 @@
     transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
+.actions strong { font: inherit; }
+
+.actions .action-icon {
+    position: static;
+    width: 24px;
+    height: 24px;
+    display: inline-grid;
+    place-items: center;
+    overflow: visible;
+    clip: auto;
+    color: currentColor;
+    font-size: 1.05rem;
+    line-height: 1;
+    font-weight: 900;
+}
+
+.actions em {
+    min-width: 20px;
+    height: 20px;
+    display: inline-grid;
+    place-items: center;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #eef6f1;
+    color: #5c6b62;
+    font-size: 0.72rem;
+    font-style: normal;
+    font-weight: 900;
+}
+
+.actions form.is-active button,
+.actions button.is-shared {
+    background: var(--feed-mint);
+    color: var(--feed-green);
+}
+
+.actions button.pop {
+    animation: action-pop .24s ease;
+}
+
+.actions button.is-loading {
+    opacity: .7;
+    pointer-events: none;
+}
+
+@keyframes action-pop {
+    50% { transform: scale(1.06); }
+}
+
 .actions button:hover,
 .actions a:hover {
     transform: translateY(-1px);
@@ -392,7 +446,7 @@
     color: var(--feed-green);
 }
 
-.actions span {
+.actions > span:not(.action-icon) {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -517,6 +571,47 @@
     transform: translateY(-3px) scale(1.02);
 }
 
+.reveal-card {
+    animation: fade-up .38s ease both;
+}
+
+[data-theme="dark"] .social-layout {
+    background:
+        radial-gradient(circle at 18% 0%, rgba(22, 196, 127, 0.08), transparent 28%),
+        linear-gradient(180deg, #0b120f 0%, #0d1511 100%);
+}
+
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .quick-links,
+[data-theme="dark"] .widget-card,
+[data-theme="dark"] .composer,
+[data-theme="dark"] .feed-card,
+[data-theme="dark"] .feed-hero,
+[data-theme="dark"] .load-more,
+[data-theme="dark"] .empty-state {
+    background: rgba(20,31,26,.92);
+    color: var(--text);
+}
+
+[data-theme="dark"] .feed-hero h1,
+[data-theme="dark"] .profile-card h2,
+[data-theme="dark"] .widget-title strong,
+[data-theme="dark"] .author,
+[data-theme="dark"] .job-body p,
+[data-theme="dark"] .trend-item,
+[data-theme="dark"] .actions button,
+[data-theme="dark"] .actions a {
+    color: var(--text);
+}
+
+[data-theme="dark"] .composer-input,
+[data-theme="dark"] .profile-stats span,
+[data-theme="dark"] .meta-row span,
+[data-theme="dark"] .category-pills a,
+[data-theme="dark"] .trend-item:hover {
+    background: rgba(255,255,255,.06);
+}
+
 @media (max-width: 1180px) {
     .social-layout {
         grid-template-columns: 220px minmax(0, 1fr);
@@ -530,7 +625,7 @@
 @media (max-width: 860px) {
     .social-layout {
         grid-template-columns: minmax(0, 1fr);
-        padding: 14px 12px 118px;
+        padding: 14px 12px 86px;
         min-height: 100vh;
     }
 
@@ -576,13 +671,13 @@
     }
 
     .feed-fab {
-        display: grid;
+        display: none;
     }
 }
 
 @media (max-width: 520px) {
     .social-layout {
-        padding: 10px 10px 112px;
+        padding: 10px 10px 82px;
     }
 
     .composer {
@@ -615,7 +710,7 @@
     }
 
     .actions {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         padding: 8px;
     }
 
@@ -623,9 +718,5 @@
     .actions button {
         font-size: 0.76rem;
         min-height: 38px;
-    }
-
-    .actions a:nth-of-type(2) {
-        display: none;
     }
 }

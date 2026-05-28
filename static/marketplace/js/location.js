@@ -24,7 +24,7 @@ function renderLocationPreview(lat, lng, label = 'Selected location') {
     const preview = document.querySelector('#map-preview');
     if (!preview || !Number.isFinite(latNumber) || !Number.isFinite(lngNumber)) return;
 
-    preview.innerHTML = `<iframe title="OpenStreetMap preview" width="100%" height="220" style="border:0;border-radius:8px" src="https://www.openstreetmap.org/export/embed.html?bbox=${lngNumber - 0.02}%2C${latNumber - 0.02}%2C${lngNumber + 0.02}%2C${latNumber + 0.02}&layer=mapnik&marker=${latNumber}%2C${lngNumber}"></iframe><span class="preview-label">${label}</span>`;
+    preview.innerHTML = `<span class="preview-label">${label}</span>`;
 }
 
 document.querySelectorAll('[data-detect-location]').forEach((button) => {
@@ -128,12 +128,12 @@ function initLocationAutocomplete() {
                 renderSuggestions(data.results || []);
                 if (!data.results?.length) {
                     list.hidden = false;
-                    list.innerHTML = '<div class="location-suggestion-empty">No match found. Use the map picker if available.</div>';
+                    list.innerHTML = '<div class="location-suggestion-empty">No match found. Try a nearby town, road, ward, or landmark.</div>';
                 }
             } catch (error) {
                 if (error.name === 'AbortError') return;
                 list.hidden = false;
-                list.innerHTML = '<div class="location-suggestion-empty">Search failed. Use the map picker if available.</div>';
+                list.innerHTML = '<div class="location-suggestion-empty">Search failed. Try typing the location again.</div>';
             }
         }
 
@@ -151,53 +151,4 @@ function initLocationAutocomplete() {
     });
 }
 
-function initMapPicker() {
-    const toggle = document.querySelector('[data-map-picker-toggle]');
-    const picker = document.querySelector('[data-map-picker]');
-    const mapEl = document.querySelector('#post-location-map');
-    if (!toggle || !picker || !mapEl || !window.maplibregl) return;
-
-    let map = null;
-    let marker = null;
-
-    function ensureMap() {
-        if (map) {
-            map.resize();
-            return;
-        }
-
-        map = new maplibregl.Map({
-            container: mapEl,
-            style: 'https://tiles.openfreemap.org/styles/liberty',
-            center: [36.9476, -0.4201],
-            zoom: 12,
-            minZoom: 6,
-            maxZoom: 21,
-            maxBounds: [[33.5, -4.9], [42.1, 5.3]],
-            attributionControl: false,
-        });
-        map.addControl(new maplibregl.NavigationControl(), 'top-right');
-        map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
-
-        map.on('click', (event) => {
-            const { lat, lng } = event.lngLat;
-            setLocationInputs(lat, lng, fieldScope(mapEl));
-            renderLocationPreview(lat, lng, 'Map pin selected');
-            if (marker) marker.remove();
-            marker = new maplibregl.Marker({ color: '#00c46a' })
-                .setLngLat([lng, lat])
-                .addTo(map);
-        });
-    }
-
-    toggle.addEventListener('click', () => {
-        picker.hidden = !picker.hidden;
-        toggle.textContent = picker.hidden ? 'Pick exact place on map' : 'Hide map picker';
-        if (!picker.hidden) {
-            window.setTimeout(ensureMap, 50);
-        }
-    });
-}
-
 initLocationAutocomplete();
-initMapPicker();

@@ -1,4 +1,4 @@
-<article class="feed-card">
+<article class="feed-card reveal-card">
     <header class="card-head">
         <a class="avatar mini-avatar" href="{% url 'profile_detail' job.employer.username %}">{{ job.employer.username|first|upper }}</a>
         <div class="card-author">
@@ -8,7 +8,7 @@
             </a>
             <small>{{ job.created_at|timesince }} ago - {{ job.location }}</small>
         </div>
-        <span class="card-menu">...</span>
+        <span class="card-menu" aria-hidden="true">...</span>
     </header>
 
     <div class="job-body">
@@ -29,18 +29,30 @@
     {% if job.video %}<video class="job-media" controls src="{{ job.video.url }}"></video>{% endif %}
 
     <footer class="actions">
-        <form method="post" action="{% url 'toggle_like' job.pk %}">
+        <form method="post" action="{% url 'toggle_like' job.pk %}" data-ajax-action class="{% if job.id in liked_ids %}is-active{% endif %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button title="Like" type="submit"><span>Like</span>{% if job.id in liked_ids %}Liked{% else %}Like{% endif %}</button>
+            <button title="Like" type="submit" aria-label="Like job">
+                <span aria-hidden="true" class="action-icon">♡</span>
+                <strong class="sr-only" data-label>{% if job.id in liked_ids %}Liked{% else %}Like{% endif %}</strong>
+                <em data-count>{{ job.like_count|default:job.likes.count }}</em>
+            </button>
         </form>
-        <form method="post" action="{% url 'toggle_save' job.pk %}">
+        <form method="post" action="{% url 'toggle_save' job.pk %}" data-ajax-action class="{% if job.id in saved_ids %}is-active{% endif %}">
             {% csrf_token %}
             <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <button title="Save" type="submit"><span>Save</span>{% if job.id in saved_ids %}Saved{% else %}Save{% endif %}</button>
+            <button title="Save" type="submit" aria-label="Save job">
+                <span aria-hidden="true" class="action-icon">⌑</span>
+                <strong class="sr-only" data-label>{% if job.id in saved_ids %}Saved{% else %}Save{% endif %}</strong>
+                <em data-count>{{ job.saves.count }}</em>
+            </button>
         </form>
-        <a href="{{ job.get_absolute_url }}" title="Comment"><span>Comment</span>Comment</a>
-        <a href="{% url 'start_conversation' job.employer.username %}" title="Message"><span>Chat</span>Chat</a>
-        <button type="button" title="Share" data-share="{{ request.scheme }}://{{ request.get_host }}{{ job.get_absolute_url }}"><span>Share</span>Share</button>
+        <a href="{{ job.get_absolute_url }}#comments" title="Comment" aria-label="Comment"><span aria-hidden="true" class="action-icon">☰</span><strong class="sr-only">Comment</strong><em>{{ job.comment_count|default:job.comments.count }}</em></a>
+        {% if user != job.employer %}
+            <a href="{% url 'start_conversation' job.employer.username %}" title="Message" aria-label="Message {{ job.employer.username }}"><span aria-hidden="true" class="action-icon">✉</span><strong class="sr-only">Chat with {{ job.employer.username }}</strong></a>
+        {% else %}
+            <a href="{% url 'inbox' %}" title="Messages" aria-label="Open messages"><span aria-hidden="true" class="action-icon">✉</span><strong class="sr-only">Open messages</strong></a>
+        {% endif %}
+        <button type="button" title="Share" data-share="{{ request.scheme }}://{{ request.get_host }}{{ job.get_absolute_url }}" aria-label="Share job"><span aria-hidden="true" class="action-icon">↗</span><strong class="sr-only">Share</strong><em data-count>0</em></button>
     </footer>
 </article>

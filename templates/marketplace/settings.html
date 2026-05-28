@@ -1,0 +1,45 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block title %}Settings | KaziLink{% endblock %}
+{% block mobile_title %}Settings{% endblock %}
+{% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/settings.css' %}">{% endblock %}
+
+{% block content %}
+<main class="settings-page">
+    <section class="settings-card">
+        <div class="settings-head">
+            <div class="settings-avatar">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                {% else %}
+                    <span>{{ user.username|first|upper }}</span>
+                {% endif %}
+            </div>
+            <div>
+                <h1>Settings</h1>
+                <p>{{ user.username }} · {{ user.followers.count }} followers · {{ user.following.count }} following</p>
+            </div>
+        </div>
+
+        <div class="settings-grid">
+            <a href="{% url 'edit_profile' %}">
+                <strong>Edit profile</strong>
+                <span>Photo, bio, skills, location, and resume.</span>
+            </a>
+            <a href="{% url 'notifications' %}">
+                <strong>Notifications</strong>
+                <span>Review job alerts and recent activity.</span>
+            </a>
+            <a href="{% url 'profile_detail' user.username %}">
+                <strong>Public profile</strong>
+                <span>See how your profile appears to others.</span>
+            </a>
+            <a href="{% url 'logout' %}">
+                <strong>Logout</strong>
+                <span>Leave this account on this device.</span>
+            </a>
+        </div>
+    </section>
+</main>
+{% endblock %}

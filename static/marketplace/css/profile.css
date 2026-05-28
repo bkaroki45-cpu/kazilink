@@ -1,227 +1,682 @@
-/* =========================
-   PAGE BACKGROUND
-========================= */
-.profile-page {
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #071b10, #050b08);
+/* =========================================
+   MODERN KAZILINK PROFILE UI
+   Inspired by premium job platforms
+========================================= */
+
+:root{
+    --green:#00b050;
+    --green-dark:#008a3f;
+    --green-soft:#eaf8ef;
+
+    --text:#111827;
+    --muted:#6b7280;
+
+    --border:#e5e7eb;
+    --bg:#f5f7f8;
+    --card:#ffffff;
+
+    --shadow:
+        0 10px 30px rgba(0,0,0,.05);
+
+    --radius:22px;
 }
 
-/* =========================
+/* =========================================
+   PAGE
+========================================= */
+
+.profile-page{
+    background:var(--bg);
+    min-height:100vh;
+    padding:24px;
+}
+
+/* =========================================
    HERO
-========================= */
-.profile-hero {
-    position: relative;
-    min-height: 380px;
-    display: flex;
-    align-items: flex-end;
-    padding: clamp(20px, 5vw, 70px);
-    background-size: cover;
-    background-position: center;
-    color: white;
+========================================= */
+
+.profile-hero{
+    position:relative;
+
+    min-height:340px;
+
+    border-radius:32px;
+
+    overflow:hidden;
+
+    background:
+        linear-gradient(
+            135deg,
+            #008c3f,
+            #00b050
+        );
+
+    margin-bottom:28px;
+
+    padding:40px;
+
+    display:flex;
+    align-items:flex-end;
+
+    box-shadow:var(--shadow);
 }
 
-.hero-overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,79,42,0.9));
+.profile-hero::before{
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    background:
+        radial-gradient(circle at top right,
+        rgba(255,255,255,.12),
+        transparent 25%);
 }
 
-.profile-card {
-    position: relative;
-    z-index: 2;
-    max-width: 900px;
-    display: grid;
-    gap: 18px;
+/* =========================================
+   PROFILE CARD
+========================================= */
+
+.profile-card{
+    position:relative;
+    z-index:2;
+
+    width:100%;
+
+    background:white;
+
+    border-radius:28px;
+
+    padding:28px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:20px;
+
+    box-shadow:
+        0 18px 40px rgba(0,0,0,.12);
 }
 
-/* top section */
-.profile-top {
-    display: flex;
-    gap: 16px;
-    align-items: center;
+/* =========================================
+   PROFILE TOP
+========================================= */
+
+.profile-top{
+    display:flex;
+    align-items:center;
+    gap:22px;
 }
 
-/* avatar */
-.avatar.big {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: rgba(255,255,255,0.15);
-    font-size: 2rem;
-    font-weight: 800;
-    backdrop-filter: blur(10px);
+/* =========================================
+   AVATAR
+========================================= */
+
+.avatar.big{
+    width:120px;
+    height:120px;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--green),
+            var(--green-dark)
+        );
+
+    color:white;
+
+    display:grid;
+    place-items:center;
+
+    font-size:2.8rem;
+    font-weight:900;
+
+    border:6px solid white;
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.12);
+
+    flex-shrink:0;
+    overflow:hidden;
 }
 
-/* name */
-.profile-info h1 {
-    margin: 0;
-    font-size: clamp(2rem, 4vw, 3.5rem);
+.avatar.big img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
 }
 
-.verified {
-    font-size: 0.75rem;
-    background: #30b64b;
-    padding: 4px 10px;
-    border-radius: 999px;
-    margin-left: 8px;
+/* =========================================
+   INFO
+========================================= */
+
+.profile-info h1{
+    margin:0;
+
+    font-size:clamp(2rem,4vw,3rem);
+
+    color:var(--text);
+
+    display:flex;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
 }
 
-.bio {
-    margin-top: 6px;
-    opacity: 0.9;
+.verified{
+    background:var(--green);
+
+    color:white;
+
+    padding:6px 12px;
+
+    border-radius:999px;
+
+    font-size:.75rem;
+    font-weight:700;
 }
 
-/* actions */
-.profile-actions {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.bio{
+    margin-top:10px;
+
+    color:var(--muted);
+
+    line-height:1.7;
+
+    max-width:700px;
 }
 
-/* =========================
-   GRID LAYOUT
-========================= */
-.profile-grid {
-    display: grid;
-    grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(260px, 320px);
-    gap: 20px;
-    padding: 24px clamp(14px, 5vw, 60px);
+/* =========================================
+   ACTIONS
+========================================= */
+
+.profile-actions{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
 }
 
-/* cards */
-.card {
-    background: rgba(255,255,255,0.95);
-    border-radius: 22px;
-    padding: 18px;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+.btn{
+    border:none;
+    outline:none;
+
+    text-decoration:none;
+
+    padding:14px 20px;
+
+    border-radius:16px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.22s ease;
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
 }
 
-/* =========================
-   TRUST CARD
-========================= */
-.trust-card {
-    display: grid;
-    gap: 14px;
+.btn.primary{
+    background:
+        linear-gradient(
+            135deg,
+            var(--green),
+            var(--green-dark)
+        );
+
+    color:white;
 }
 
-.trust-item span {
-    font-size: 0.8rem;
-    color: #666;
+.btn.primary:hover{
+    transform:translateY(-3px);
 }
 
-.trust-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
+.btn.ghost{
+    background:white;
+
+    border:1px solid var(--border);
+
+    color:var(--text);
 }
 
-.trust-stats strong {
-    font-size: 1.3rem;
-    color: #0b3d1e;
+.btn.ghost:hover{
+    background:#f9fafb;
 }
 
-/* =========================
-   MAIN CONTENT
-========================= */
-.main-content h2 {
-    margin-top: 0;
+/* =========================================
+   STATS BAR
+========================================= */
+
+.stats-bar{
+    margin-top:24px;
+
+    background:white;
+
+    border-radius:24px;
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:10px;
+
+    padding:20px;
+
+    box-shadow:var(--shadow);
 }
 
-.section-title {
-    margin-top: 18px;
+.stat{
+    display:flex;
+    align-items:center;
+    gap:14px;
+
+    padding:16px;
+
+    border-radius:18px;
+
+    transition:.2s ease;
 }
 
-.mini-grid {
-    display: grid;
-    gap: 10px;
+.stat:hover{
+    background:#f8faf9;
 }
 
-.mini-card {
-    padding: 12px;
-    border-radius: 12px;
-    background: #f6fbf8;
-    text-decoration: none;
-    color: inherit;
-    transition: 0.2s ease;
-    border: 1px solid rgba(48,182,75,.08);
+.stat-icon{
+    width:52px;
+    height:52px;
+
+    border-radius:14px;
+
+    background:var(--green-soft);
+
+    color:var(--green);
+
+    display:grid;
+    place-items:center;
+
+    font-size:1.2rem;
+    font-weight:800;
 }
 
-.mini-card:hover {
-    transform: translateY(-3px);
+.stat strong{
+    display:block;
+
+    font-size:1.6rem;
+
+    color:var(--text);
 }
 
-/* updates */
-.update {
-    padding: 12px;
-    border-radius: 12px;
-    background: #f6fbf8;
-    margin-top: 10px;
+.stat span{
+    color:var(--muted);
+    font-size:.88rem;
 }
 
-/* =========================
+/* =========================================
+   GRID
+========================================= */
+
+.profile-grid{
+    display:grid;
+
+    grid-template-columns:
+        minmax(0,2fr)
+        minmax(300px,380px);
+
+    gap:24px;
+    margin-top:24px;
+}
+
+/* =========================================
+   CARD
+========================================= */
+
+.card{
+    background:var(--card);
+
+    border-radius:24px;
+
+    padding:26px;
+
+    box-shadow:var(--shadow);
+
+    border:1px solid rgba(0,0,0,.03);
+}
+
+.card h2{
+    margin-top:0;
+
+    font-size:1.5rem;
+
+    color:var(--text);
+
+    margin-bottom:22px;
+}
+
+/* =========================================
+   TRUST SECTION
+========================================= */
+
+.trust-card{
+    display:grid;
+    gap:18px;
+}
+
+.trust-item{
+    padding:18px;
+
+    border-radius:18px;
+
+    background:#f9fbfa;
+
+    border:1px solid #edf1ef;
+}
+
+.trust-item span{
+    display:block;
+
+    font-size:.75rem;
+
+    font-weight:700;
+
+    color:var(--muted);
+
+    text-transform:uppercase;
+
+    margin-bottom:8px;
+}
+
+.trust-item p,
+.trust-item strong{
+    margin:0;
+
+    color:var(--text);
+
+    line-height:1.7;
+}
+
+.trust-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+
+.trust-stats div{
+    background:var(--green-soft);
+
+    border-radius:18px;
+
+    padding:20px;
+
+    text-align:center;
+}
+
+.trust-stats strong{
+    display:block;
+
+    color:var(--green-dark);
+
+    font-size:1.8rem;
+
+    margin-bottom:6px;
+}
+
+/* =========================================
+   JOBS
+========================================= */
+
+.mini-grid{
+    display:grid;
+    gap:16px;
+}
+
+.mini-card{
+    display:block;
+
+    text-decoration:none;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    border:1px solid #edf1ef;
+
+    background:#fafcfb;
+
+    transition:.22s ease;
+}
+
+.mini-card:hover{
+    transform:translateY(-4px);
+
+    box-shadow:
+        0 14px 30px rgba(0,0,0,.05);
+}
+
+.mini-card strong{
+    display:block;
+
+    margin-bottom:8px;
+
+    color:var(--text);
+
+    font-size:1rem;
+}
+
+.mini-card small{
+    color:var(--muted);
+}
+
+/* =========================================
+   UPDATES
+========================================= */
+
+.update{
+    margin-top:14px;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    background:#fafcfb;
+
+    border:1px solid #edf1ef;
+
+    line-height:1.7;
+
+    color:#374151;
+}
+
+/* =========================================
    REVIEWS
-========================= */
-.reviews-card {
-    display: grid;
-    gap: 12px;
+========================================= */
+
+.reviews-card{
+    display:grid;
+    gap:18px;
 }
 
-.review-form {
-    display: grid;
-    gap: 8px;
+.review-form{
+    display:grid;
+    gap:12px;
+
+    padding:18px;
+
+    border-radius:20px;
+
+    background:#fafcfb;
+
+    border:1px solid #edf1ef;
 }
 
-.review {
-    padding: 12px;
-    border-radius: 12px;
-    background: #f6fbf8;
+.review-form input,
+.review-form textarea{
+    width:100%;
+
+    padding:14px;
+
+    border-radius:14px;
+
+    border:1px solid #dbe4dd;
+
+    outline:none;
+
+    font-size:.95rem;
+
+    transition:.22s ease;
 }
 
-.stars {
-    color: #f4b400;
-    font-weight: 700;
+.review-form textarea{
+    min-height:120px;
+    resize:vertical;
 }
 
-/* empty */
-.empty {
-    color: #777;
-    font-size: 0.9rem;
+.review-form input:focus,
+.review-form textarea:focus{
+    border-color:var(--green);
+
+    box-shadow:
+        0 0 0 4px rgba(0,176,80,.10);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 1050px) {
-    .profile-grid {
-        grid-template-columns: 1fr;
+.check{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    color:#374151;
+}
+
+.review{
+    padding:18px;
+
+    border-radius:18px;
+
+    background:#fafcfb;
+
+    border:1px solid #edf1ef;
+}
+
+.review p{
+    line-height:1.7;
+    color:#374151;
+}
+
+.review small{
+    color:var(--muted);
+}
+
+.stars{
+    color:#ffb800;
+
+    font-size:1rem;
+    font-weight:800;
+}
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.empty{
+    color:var(--muted);
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width:1100px){
+
+    .profile-grid{
+        grid-template-columns:1fr;
     }
 
-    .profile-top {
-        flex-direction: column;
-        align-items: flex-start;
+    .stats-bar{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .profile-card{
+        flex-direction:column;
+        align-items:flex-start;
     }
 }
 
-@media (max-width: 620px) {
-    .profile-hero {
-        min-height: 320px;
-        padding: 22px 14px;
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width:700px){
+
+    .profile-page{
+        padding:12px 12px 82px;
+    }
+
+    .profile-hero{
+        padding:18px;
+        min-height:auto;
+        border-radius:24px;
+    }
+
+    .profile-card{
+        padding:20px;
+        border-radius:24px;
+    }
+
+    .profile-top{
+        flex-direction:column;
+        align-items:flex-start;
+    }
+
+    .avatar.big{
+        width:90px;
+        height:90px;
+        font-size:2rem;
+    }
+
+    .profile-info h1{
+        font-size:1.55rem;
+        overflow-wrap:anywhere;
+    }
+
+    .bio{
+        font-size:.92rem;
+    }
+
+    .profile-actions{
+        width:100%;
     }
 
     .profile-actions .btn,
     .profile-actions form,
-    .profile-actions button {
-        width: 100%;
+    .profile-actions button{
+        width:100%;
     }
 
-    .profile-grid {
-        padding: 16px 10px;
+    .stats-bar{
+        grid-template-columns:1fr;
+        padding:14px;
     }
 
-    .trust-stats {
-        display: grid;
-        gap: 10px;
+    .profile-grid{
+        gap:18px;
+    }
+
+    .card{
+        padding:20px;
+        border-radius:20px;
+        min-width:0;
+    }
+
+    .mini-card,
+    .trust-item,
+    .review,
+    .update {
+        overflow-wrap:anywhere;
+    }
+
+    .trust-stats{
+        grid-template-columns:1fr;
     }
 }
