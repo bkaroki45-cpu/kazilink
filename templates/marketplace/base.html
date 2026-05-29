@@ -15,12 +15,16 @@
     {% block page_css %}{% endblock %}
 </head>
 
-<body>
+<body class="{% block body_class %}{% endblock %}">
 
 <div class="app">
 
     <!-- ===== TOP BAR ===== -->
     <header class="topbar">
+
+        <button class="back-button" type="button" data-back-button aria-label="Go back">
+            <span aria-hidden="true">&larr;</span>
+        </button>
 
         <!-- Brand -->
         <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
@@ -42,7 +46,13 @@
 
                 <!-- Drawer profile (shown only on mobile) -->
                 <div class="drawer-profile">
-                    <span class="avatar">{{ user.username|first|upper }}</span>
+                    <span class="avatar">
+                        {% if user.profile.avatar %}
+                            <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                        {% else %}
+                            {{ user.username|first|upper }}
+                        {% endif %}
+                    </span>
                     <div>
                         <strong>{{ user.username }}</strong>
                         <small>{{ user.profile.get_role_display|default:'KaziLink member' }}</small>
@@ -60,12 +70,15 @@
                     {% endif %}
                 </a>
                 <a href="{% url 'settings' %}">Settings</a>
-                <button class="theme-toggle" type="button" data-theme-toggle aria-label="Toggle dark mode">
-                    <span data-theme-icon>☀</span>
-                </button>
                 <div class="profile-menu" data-profile-menu>
                     <button class="profile-trigger" type="button" aria-label="Open profile menu" aria-expanded="false" data-profile-toggle>
-                        <span class="avatar sm">{{ user.username|first|upper }}</span>
+                        <span class="avatar sm">
+                            {% if user.profile.avatar %}
+                                <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                            {% else %}
+                                {{ user.username|first|upper }}
+                            {% endif %}
+                        </span>
                         <span class="profile-trigger-name">{{ user.username }}</span>
                     </button>
                     <div class="profile-dropdown" role="menu">
@@ -80,8 +93,8 @@
 
             {% else %}
 
-                <a href="{% url 'landing' %}#jobs">Find Work</a>
-                <a href="{% url 'landing' %}#post">Hire Talent</a>
+                <a href="{% url 'find_jobs' %}">Find Work</a>
+                <a href="{% url 'landing' %}#how">How It Works</a>
                 <a href="{% url 'login' %}">Login</a>
                 <a class="btn btn-primary" href="{% url 'register' %}">Get Started</a>
 
@@ -117,14 +130,15 @@
             <span>Jobs</span>
         </a>
 
-        <a class="bottom-post" href="{% url 'post_job' %}" data-nav-path="post">
-            <span>
-                <!-- Plus icon -->
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round">
-                    <line x1="12" y1="5" x2="12" y2="19"/>
-                    <line x1="5" y1="12" x2="19" y2="12"/>
-                </svg>
-            </span>
+        <a class="bottom-post" href="{% url 'post_job' %}" data-nav-path="post" aria-label="Post job">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="5" width="18" height="16" rx="2"/>
+                <path d="M16 3v4"/>
+                <path d="M8 3v4"/>
+                <path d="M8 12h8"/>
+                <path d="M8 16h5"/>
+            </svg>
+            <span>Post Job</span>
         </a>
 
         <a href="{% url 'inbox' %}" data-nav-path="inbox">

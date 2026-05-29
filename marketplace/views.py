@@ -8,9 +8,10 @@ from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -966,13 +967,23 @@ def chat_room(request, conversation_id):
                 Notification.objects.create(user=participant, title='New message', body=request.user.username, url=reverse('chat_room', kwargs={'conversation_id': conversation.id}))
             return redirect('chat_room', conversation_id=conversation.id)
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(seen=True)
-    return render(request, 'marketplace/chat.html', {'conversation': conversation, 'message_form': MessageForm()})
+    visible_messages = conversation.messages.select_related('sender', 'sender__profile').exclude(hidden_for=request.user)
+    return render(request, 'marketplace/chat.html', {
+        'conversation': conversation,
+        'visible_messages': visible_messages,
+        'message_form': MessageForm(),
+    })
 
 
 @login_required
 def chat_messages_api(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(seen=True)
+    other_typing = False
+    for participant_id in conversation.participants.exclude(id=request.user.id).values_list('id', flat=True):
+        if cache.get(f'chat_typing:{conversation.id}:{participant_id}'):
+            other_typing = True
+            break
     messages_payload = [
         {
             'id': message.id,
@@ -984,10 +995,54 @@ def chat_messages_api(request, conversation_id):
             'attachment': message.attachment.url if message.attachment else '',
             'time': message.created_at.strftime('%H:%M'),
             'seen': message.seen,
+            'deleted': message.deleted_for_everyone,
+            'sender_avatar': message.sender.profile.avatar.url if hasattr(message.sender, 'profile') and message.sender.profile.avatar else '',
+            'delete_for_me_url': reverse('delete_message_for_me', kwargs={'message_id': message.id}),
+            'delete_for_everyone_url': reverse('delete_message_for_everyone', kwargs={'message_id': message.id}),
         }
-        for message in conversation.messages.select_related('sender')
+        for message in conversation.messages.select_related('sender', 'sender__profile').exclude(hidden_for=request.user)
     ]
-    return JsonResponse({'messages': messages_payload})
+    return JsonResponse({'messages': messages_payload, 'typing': other_typing})
+
+
+@login_required
+@require_POST
+def chat_typing_api(request, conversation_id):
+    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
+    is_typing = request.POST.get('typing') == '1'
+    key = f'chat_typing:{conversation.id}:{request.user.id}'
+    if is_typing:
+        cache.set(key, True, 4)
+    else:
+        cache.delete(key)
+    return JsonResponse({'ok': True})
+
+
+@login_required
+@require_POST
+def delete_message_for_me(request, message_id):
+    message = get_object_or_404(Message, id=message_id, conversation__participants=request.user)
+    message.hidden_for.add(request.user)
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True})
+    return redirect('chat_room', conversation_id=message.conversation_id)
+
+
+@login_required
+@require_POST
+def delete_message_for_everyone(request, message_id):
+    message = get_object_or_404(Message, id=message_id, conversation__participants=request.user)
+    if message.sender_id != request.user.id:
+        return HttpResponseForbidden('Only the sender can delete this message for everyone.')
+    message.deleted_for_everyone = True
+    message.body = ''
+    message.image = ''
+    message.voice_note = ''
+    message.attachment = ''
+    message.save(update_fields=['deleted_for_everyone', 'body', 'image', 'voice_note', 'attachment'])
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({'ok': True, 'deleted': True})
+    return redirect('chat_room', conversation_id=message.conversation_id)
 
 
 @login_required

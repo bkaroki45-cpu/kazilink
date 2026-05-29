@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block title %}Chat | KaziLink{% endblock %}
+{% block body_class %}hide-bottom-nav{% endblock %}
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'marketplace/css/chat.css' %}">
@@ -10,13 +11,10 @@
 {% block content %}
 
 <main class="chat-page">
-
-    <!-- HEADER -->
     <header class="chat-header">
-
         <div class="chat-user">
             <a class="chat-back" href="{% url 'inbox' %}" aria-label="Back to chats">
-                <span aria-hidden="true">←</span>
+                <span aria-hidden="true">&larr;</span>
             </a>
 
             <div class="chat-avatar">
@@ -32,7 +30,6 @@
             </div>
 
             <div class="chat-meta">
-
                 <h1>
                     {% for participant in conversation.participants.all %}
                         {% if participant != user %}
@@ -40,121 +37,104 @@
                         {% endif %}
                     {% endfor %}
                 </h1>
-
                 <div class="status">
                     <span class="online-dot"></span>
-                    <span>Online now</span>
+                    <span data-typing-status>Online now</span>
                 </div>
-
             </div>
-
         </div>
     </header>
 
-    <!-- MESSAGES -->
     <section
         class="messages-pane"
         data-chat-pane
         data-chat-url="{% url 'chat_messages_api' conversation.id %}"
+        data-typing-url="{% url 'chat_typing_api' conversation.id %}"
     >
-
-        {% for message in conversation.messages.all %}
-
-            <div class="message-row {% if message.sender == user %}mine{% endif %}">
-
+        {% for message in visible_messages %}
+            <div class="message-row {% if message.sender == user %}mine{% endif %}" data-message-row>
                 {% if message.sender != user %}
                     <div class="message-avatar">
-                        {{ message.sender.username|first|upper }}
+                        {% if message.sender.profile.avatar %}
+                            <img src="{{ message.sender.profile.avatar.url }}" alt="{{ message.sender.username }}">
+                        {% else %}
+                            {{ message.sender.username|first|upper }}
+                        {% endif %}
                     </div>
                 {% endif %}
 
-                <article class="bubble {% if message.sender == user %}mine{% endif %}"
-                         data-message-id="{{ message.id }}">
+                <article class="bubble {% if message.sender == user %}mine{% endif %}" data-message-id="{{ message.id }}">
+                    <div class="message-actions">
+                        <button type="button" data-message-menu aria-label="Message actions">...</button>
+                        <div class="message-menu">
+                            <form method="post" action="{% url 'delete_message_for_me' message.id %}" data-delete-message>
+                                {% csrf_token %}
+                                <button type="submit">Delete for me</button>
+                            </form>
+                            {% if message.sender == user %}
+                                <form method="post" action="{% url 'delete_message_for_everyone' message.id %}" data-delete-message>
+                                    {% csrf_token %}
+                                    <button type="submit">Delete for everyone</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
 
-                    {% if message.body %}
-                        <p>{{ message.body }}</p>
-                    {% endif %}
-
-                    {% if message.image %}
-                        <img src="{{ message.image.url }}" alt="attachment">
-                    {% endif %}
-
-                    {% if message.voice_note %}
-                        <audio controls src="{{ message.voice_note.url }}"></audio>
-                    {% endif %}
-
-                    {% if message.attachment %}
-                        <a class="file-link" href="{{ message.attachment.url }}">
-                            📎 Download file
-                        </a>
+                    {% if message.deleted_for_everyone %}
+                        <p class="unsent-message">Message unsent</p>
+                    {% else %}
+                        {% if message.body %}
+                            <p>{{ message.body }}</p>
+                        {% endif %}
+                        {% if message.image %}
+                            <img src="{{ message.image.url }}" alt="attachment">
+                        {% endif %}
+                        {% if message.voice_note %}
+                            <audio controls src="{{ message.voice_note.url }}"></audio>
+                        {% endif %}
+                        {% if message.attachment %}
+                            <a class="file-link" href="{{ message.attachment.url }}">Attachment</a>
+                        {% endif %}
                     {% endif %}
 
                     <small>
                         {{ message.created_at|time:"H:i" }}
-
-                        {% if message.seen and message.sender == user %}
-                            • Seen
+                        {% if message.sender == user %}
+                            {% if message.deleted_for_everyone %}
+                                <span class="message-status unsent" title="Message unsent">x</span>
+                            {% elif message.seen %}
+                                <span class="message-status read" title="Read">&check;&check;</span>
+                            {% else %}
+                                <span class="message-status delivered" title="Delivered">&check;&check;</span>
+                            {% endif %}
                         {% endif %}
                     </small>
-
                 </article>
-
             </div>
-
         {% endfor %}
-
+        <div class="typing-indicator" data-typing-indicator hidden>
+            <span></span><span></span><span></span>
+        </div>
     </section>
 
-    <!-- INPUT -->
     <form class="message-box" method="post" enctype="multipart/form-data">
-
         {% csrf_token %}
-
-        <!-- ATTACHMENTS -->
         <div class="attachment-picker" data-attachment-picker>
-
-            <button class="attach-btn"
-                    type="button"
-                    data-attachment-toggle>
-                +
-            </button>
-
+            <button class="attach-btn" type="button" data-attachment-toggle>+</button>
             <div class="attachment-menu" data-attachment-menu>
-
-                <label>
-                    📷 Image
-                    {{ message_form.image }}
-                </label>
-
-                <label>
-                    🎤 Voice
-                    {{ message_form.voice_note }}
-                </label>
-
-                <label>
-                    📎 File
-                    {{ message_form.attachment }}
-                </label>
-
+                <label>Image {{ message_form.image }}</label>
+                <label>Voice {{ message_form.voice_note }}</label>
+                <label>File {{ message_form.attachment }}</label>
             </div>
-
         </div>
 
-        <!-- MESSAGE -->
         <div class="input-wrapper">
             {{ message_form.body }}
         </div>
 
-        <span class="attachment-name"
-              data-attachment-name></span>
-
-        <!-- SEND -->
-        <button class="send-btn" type="submit">
-            ➤
-        </button>
-
+        <span class="attachment-name" data-attachment-name></span>
+        <button class="send-btn" type="submit">Send</button>
     </form>
-
 </main>
 
 {% endblock %}

@@ -194,11 +194,13 @@ class Conversation(models.Model):
 class Message(models.Model):
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    hidden_for = models.ManyToManyField(User, blank=True, related_name='hidden_messages')
     body = models.TextField(blank=True)
     attachment = models.FileField(upload_to='chat/files/', blank=True)
     image = models.ImageField(upload_to='chat/images/', blank=True)
     voice_note = models.FileField(upload_to='chat/voice/', blank=True)
     seen = models.BooleanField(default=False)
+    deleted_for_everyone = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
