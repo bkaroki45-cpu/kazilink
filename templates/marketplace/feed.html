@@ -9,19 +9,25 @@
 <main class="social-layout">
     <aside class="left-rail">
         <section class="profile-card">
-            <a class="profile-avatar" href="{% url 'profile_detail' user.username %}">{{ user.username|first|upper }}</a>
+            <a class="profile-avatar" href="{% url 'profile_detail' user.username %}">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                {% else %}
+                    {{ user.username|first|upper }}
+                {% endif %}
+            </a>
             <div>
                 <h2>{{ user.username }}</h2>
                 <p>{{ user.profile.location|default:'Ready to work across Kenya' }}</p>
             </div>
             <div class="profile-stats">
-                <span><strong>{{ alert_match_count|default:0 }}</strong>Alerts</span>
-                <span><strong>{{ user.profile.rating_average }}</strong>Rating</span>
+                <span><strong>{{ user.followers.count }}</strong>Followers</span>
+                <span><strong>{{ user.following.count }}</strong>Following</span>
             </div>
         </section>
 
         <nav class="quick-links">
-            <a href="{% url 'post_job' %}"><span>+</span>Post a job</a>
+            <a href="{% url 'post_job' %}"><span>Job</span>Post a job</a>
             <a href="{% url 'find_jobs' %}?nearby=1"><span>Near</span>Nearby jobs</a>
             <a href="{% url 'notifications' %}"><span>{{ alert_match_count|default:0 }}</span>Job alerts</a>
             <a href="{% url 'inbox' %}"><span>Msg</span>Messages</a>
@@ -39,7 +45,13 @@
         </section>
 
         <section class="composer">
-            <span class="avatar">{{ user.username|first|upper }}</span>
+            <span class="avatar">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}">
+                {% else %}
+                    {{ user.username|first|upper }}
+                {% endif %}
+            </span>
             <a class="composer-input" href="{% url 'post_job' %}">What work are you posting today?</a>
             <div class="composer-actions">
                 <a href="{% url 'post_job' %}">Location</a>
@@ -106,7 +118,7 @@
         </section>
     </aside>
 
-    <a class="feed-fab" href="{% url 'post_job' %}" aria-label="Post a job">+</a>
+    <a class="feed-fab" href="{% url 'post_job' %}" aria-label="Post a job">Job</a>
 </main>
 {% endblock %}
 

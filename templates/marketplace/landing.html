@@ -16,15 +16,19 @@
 <div class="bg-word">KAZILINK</div>
 
 <header class="site-header">
+    <button class="back-button" type="button" onclick="history.length > 1 ? history.back() : location.href='{% url 'landing' %}'" aria-label="Go back">
+        <span aria-hidden="true">&larr;</span>
+    </button>
+
     <a class="brand" href="{% url 'landing' %}">
         <span class="brand-mark">K</span>
         <span>Kazi<span>Link</span></span>
     </a>
 
     <nav class="nav-links">
-        <a href="#features">Features</a>
+        <a href="{% url 'find_jobs' %}">Jobs</a>
         <a href="#how">How it works</a>
-        <a href="#trust">Trust</a>
+        <a href="#features">Features</a>
     </nav>
 
     <div class="header-actions">
@@ -46,7 +50,7 @@
         <h1>Connect. <span>Work.</span> Grow.</h1>
 
         <p class="hero-text">
-            Find real jobs, hire trusted talent, and keep every opportunity moving in one clean workspace.
+            Find real jobs, hire capable talent, and keep every opportunity moving in one clean workspace.
         </p>
 
         <div class="hero-actions">
@@ -62,7 +66,7 @@
         <div class="hero-proof">
             <div><strong>25K+</strong><span>Jobs</span></div>
             <div><strong>18K+</strong><span>Employers</span></div>
-            <div><strong>4.9&#9733;</strong><span>Rating</span></div>
+            <div><strong>1:1</strong><span>Messages</span></div>
         </div>
 
     </div>
@@ -89,21 +93,21 @@
 
         <div class="rating-card">
             <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-            <strong>Trusted by thousands</strong>
+            <strong>Fast local hiring</strong>
         </div>
 
     </div>
 
 </section>
 
-<section class="trusted-by">
-    <p>Trusted across Kenya</p>
+<section class="opportunity-strip">
+    <p>Built for everyday work</p>
     <div class="company-logos">
-        <span>Safaricom</span>
-        <span>Equity</span>
-        <span>KCB</span>
-        <span>Jumia</span>
-        <span>NCBA</span>
+        <span>Nearby jobs</span>
+        <span>Direct chat</span>
+        <span>Fast hiring</span>
+        <span>Saved posts</span>
+        <span>Job alerts</span>
     </div>
 </section>
 
@@ -133,7 +137,7 @@
     </div>
 </section>
 
-<section class="workflow">
+<section class="workflow" id="how">
     <div class="workflow-copy">
         <h2>Simple workflow</h2>
         <p>From profile to opportunity in minutes.</p>

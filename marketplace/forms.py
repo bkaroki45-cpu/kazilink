@@ -7,11 +7,17 @@ from .models import ActivityUpdate, Application, Comment, Job, JobAlert, Message
 
 
 class RegisterForm(UserCreationForm):
-    email = forms.EmailField()
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Email address'}))
 
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({'placeholder': 'Username'})
+        self.fields['password1'].widget.attrs.update({'placeholder': 'Password'})
+        self.fields['password2'].widget.attrs.update({'placeholder': 'Confirm password'})
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()

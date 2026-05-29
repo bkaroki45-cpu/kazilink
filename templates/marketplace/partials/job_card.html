@@ -1,6 +1,12 @@
 <article class="feed-card reveal-card">
     <header class="card-head">
-        <a class="avatar mini-avatar" href="{% url 'profile_detail' job.employer.username %}">{{ job.employer.username|first|upper }}</a>
+        <a class="avatar mini-avatar" href="{% url 'profile_detail' job.employer.username %}">
+            {% if job.employer.profile.avatar %}
+                <img src="{{ job.employer.profile.avatar.url }}" alt="{{ job.employer.username }}">
+            {% else %}
+                {{ job.employer.username|first|upper }}
+            {% endif %}
+        </a>
         <div class="card-author">
             <a class="author" href="{% url 'profile_detail' job.employer.username %}">
                 {{ job.employer.username }}

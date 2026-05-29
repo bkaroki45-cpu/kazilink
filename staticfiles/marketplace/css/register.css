@@ -289,6 +289,15 @@ body {
     transition: .2s ease;
 }
 
+.password-field input {
+    padding-right: 72px;
+}
+
+.field-group input::placeholder {
+    color: #94a39b;
+    opacity: 1;
+}
+
 .field-group input:focus,
 .field-group select:focus,
 .field-group textarea:focus {
@@ -316,6 +325,7 @@ body {
     font-weight: 700;
 
     cursor: pointer;
+    z-index: 2;
 }
 
 /* BUTTON */
@@ -488,4 +498,3 @@ body {
         min-height: 54px;
     }
 }
-

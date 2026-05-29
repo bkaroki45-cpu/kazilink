@@ -151,6 +151,20 @@
                 data-job-card="{{ job.id }}"
             >
                 <div class="card-top">
+                    <a class="result-employer" href="{% url 'profile_detail' job.employer.username %}">
+                        <span class="avatar mini-avatar">
+                            {% if job.employer.profile.avatar %}
+                                <img src="{{ job.employer.profile.avatar.url }}" alt="{{ job.employer.username }}">
+                            {% else %}
+                                {{ job.employer.username|first|upper }}
+                            {% endif %}
+                        </span>
+                        <span>
+                            <strong>{{ job.employer.username }}</strong>
+                            <small>{{ job.created_at|timesince }} ago</small>
+                        </span>
+                    </a>
+
                     {% if job.photo %}
                         <img class="result-media" src="{{ job.photo.url }}" alt="{{ job.title }}" loading="lazy">
                     {% endif %}

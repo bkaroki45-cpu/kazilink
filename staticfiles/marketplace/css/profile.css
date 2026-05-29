@@ -259,7 +259,7 @@
 
     display:grid;
 
-    grid-template-columns:repeat(4,1fr);
+    grid-template-columns:repeat(2,1fr);
 
     gap:10px;
 
@@ -679,4 +679,37 @@
     .trust-stats{
         grid-template-columns:1fr;
     }
+}
+
+[data-theme="dark"] .profile-page{
+    background:#0b120f;
+    color:var(--text);
+}
+
+[data-theme="dark"] .profile-card,
+[data-theme="dark"] .stats-bar,
+[data-theme="dark"] .card,
+[data-theme="dark"] .mini-card,
+[data-theme="dark"] .trust-item,
+[data-theme="dark"] .update {
+    background:#141f1a;
+    color:var(--text);
+    border-color:rgba(255,255,255,.09);
+}
+
+[data-theme="dark"] .profile-info h1,
+[data-theme="dark"] .card h2,
+[data-theme="dark"] .trust-item p,
+[data-theme="dark"] .trust-item strong,
+[data-theme="dark"] .mini-card strong,
+[data-theme="dark"] .stat strong {
+    color:var(--text);
+}
+
+[data-theme="dark"] .bio,
+[data-theme="dark"] .mini-card small,
+[data-theme="dark"] .trust-item span,
+[data-theme="dark"] .empty,
+[data-theme="dark"] .stat span {
+    color:var(--muted);
 }

@@ -431,6 +431,35 @@
 /* Card top */
 .card-top { display: grid; gap: 10px; min-width: 0; }
 
+.result-employer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.result-employer .mini-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+}
+
+.result-employer strong,
+.result-employer small {
+    display: block;
+}
+
+.result-employer strong {
+    font-size: .92rem;
+    font-weight: 900;
+}
+
+.result-employer small {
+    color: var(--muted);
+    font-size: .76rem;
+}
+
 .result-media {
     width: 100%;
     max-height: 220px;
@@ -807,4 +836,45 @@
     .result-card h2 { font-size: 0.98rem; }
 
     .meta span { font-size: 0.73rem; padding: 3px 8px; }
+}
+
+[data-theme="dark"] .filters,
+[data-theme="dark"] .result-card,
+[data-theme="dark"] .filter-toggle-btn,
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .btn.mini,
+[data-theme="dark"] .btn.ghost,
+[data-theme="dark"] .location-suggestions {
+    background:#141f1a;
+    color:var(--text);
+    border-color:rgba(255,255,255,.09);
+}
+
+[data-theme="dark"] .result-card:nth-child(even),
+[data-theme="dark"] .alert-builder,
+[data-theme="dark"] .gps-btn,
+[data-theme="dark"] .meta span {
+    background:rgba(255,255,255,.06);
+}
+
+[data-theme="dark"] .filters input,
+[data-theme="dark"] .filters select,
+[data-theme="dark"] .alert-builder input,
+[data-theme="dark"] .alert-builder select {
+    background:#101b16;
+    color:var(--text);
+    border-color:rgba(255,255,255,.1);
+}
+
+[data-theme="dark"] .result-card h2 a,
+[data-theme="dark"] .salary,
+[data-theme="dark"] .result-employer {
+    color:var(--text);
+}
+
+[data-theme="dark"] .result-card p,
+[data-theme="dark"] .result-employer small,
+[data-theme="dark"] .filters-header p,
+[data-theme="dark"] .empty-state p {
+    color:var(--muted);
 }

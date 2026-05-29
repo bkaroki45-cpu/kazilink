@@ -63,7 +63,7 @@
                 {% endif %}
             </span>
             <strong>{{ job.employer.username }}</strong>
-            <small>{{ job.employer.profile.rating_average }} star rating</small>
+            <small>{{ job.employer.profile.location|default:'KaziLink member' }}</small>
         </a>
         {% if user != job.employer %}
             <form class="follow-inline" method="post" action="{% url 'toggle_follow' job.employer.username %}">
@@ -73,36 +73,9 @@
             </form>
         {% endif %}
         {% if user != job.employer %}
-            <form method="post" action="{% url 'apply_job' job.pk %}">
-                {% csrf_token %}
-                {{ application_form.message }}
-                <button class="btn primary" {% if has_applied %}disabled{% endif %}>{% if has_applied %}Applied{% else %}Apply Now{% endif %}</button>
-            </form>
+            <a class="btn primary full" href="{% url 'start_conversation' job.employer.username %}">Message Employer</a>
         {% else %}
-            <section class="applications-panel">
-                <h2>Applications</h2>
-                {% for application in applications %}
-                    <article class="application-card">
-                        <a class="applicant" href="{% url 'profile_detail' application.applicant.username %}">
-                            <span class="avatar">
-                                {% if application.applicant.profile.avatar %}
-                                    <img src="{{ application.applicant.profile.avatar.url }}" alt="{{ application.applicant.username }}">
-                                {% else %}
-                                    {{ application.applicant.username|first|upper }}
-                                {% endif %}
-                            </span>
-                            <span>
-                                <strong>{{ application.applicant.username }}</strong>
-                                <small>{{ application.created_at|timesince }} ago</small>
-                            </span>
-                        </a>
-                        <p>{{ application.message|default:'No message added.' }}</p>
-                        <a class="btn ghost mini" href="{% url 'start_conversation' application.applicant.username %}">Message</a>
-                    </article>
-                {% empty %}
-                    <p class="empty">No applications yet.</p>
-                {% endfor %}
-            </section>
+            <a class="btn primary full" href="{% url 'inbox' %}">Open Messages</a>
         {% endif %}
         <section class="comments">
             <h2>Comments</h2>
