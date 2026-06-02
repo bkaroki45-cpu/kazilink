@@ -1,7 +1,7 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}Find Jobs | KaziLink{% endblock %}
+{% block title %}Find Jobs | KaziSite{% endblock %}
 {% block mobile_title %}Find Jobs{% endblock %}
 
 {% block page_css %}
@@ -145,7 +145,7 @@
 
             {% for job in jobs %}
             <article
-                class="result-card"
+                class="result-card {% if job.is_taken %}is-taken{% endif %}"
                 data-title="{{ job.title|lower }}"
                 data-location="{{ job.location|lower }}"
                 data-job-card="{{ job.id }}"
@@ -173,6 +173,9 @@
                         <span class="badge">{{ job.get_job_type_display }}</span>
                         {% if job.category %}
                             <span class="badge" style="background:#e8f0ff;color:#2356c2;">{{ job.category }}</span>
+                        {% endif %}
+                        {% if job.is_taken %}
+                            <span class="taken-ribbon">Taken</span>
                         {% endif %}
                     </div>
 
@@ -206,6 +209,11 @@
                                 <polyline points="9 18 15 12 9 6"/>
                             </svg>
                         </a>
+                        {% if user != job.employer %}
+                            <a class="btn mini" href="{% url 'start_conversation' job.employer.username %}">Message</a>
+                        {% else %}
+                            <a class="btn mini" href="{% url 'inbox' %}">Inbox</a>
+                        {% endif %}
                     </div>
                 </div>
 

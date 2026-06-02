@@ -1,5 +1,5 @@
 /* =========================================================
-   KaziLink — base.css
+   KaziSite — base.css
    Polished 3-column desktop  +  bottom-nav mobile layout
    ========================================================= */
 
@@ -1258,9 +1258,9 @@ a.btn {
 
     /* ---- Bottom nav ---- */
     .bottom-nav {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 2px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 1px;
         position: fixed;
         left: 0; right: 0; bottom: 0;
         z-index: 180;
@@ -1275,8 +1275,11 @@ a.btn {
     }
 
     .bottom-nav a {
+        position: relative;
         display: grid;
         place-items: center;
+        flex: 1 1 0;
+        min-width: 0;
         min-height: 50px;
         border-radius: 14px;
         color: var(--muted);
@@ -1288,7 +1291,58 @@ a.btn {
     }
 
     .bottom-nav a svg,
-    .bottom-nav a .nav-icon { font-size: 1.2rem; }
+    .bottom-nav a .nav-icon {
+        width: 20px;
+        height: 20px;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .bottom-nav a > span:not(.bottom-icon-wrap):not(.bottom-badge) {
+        display: block;
+        max-width: 100%;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.1;
+    }
+
+    .bottom-icon-wrap {
+        position: relative;
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        overflow: visible;
+    }
+
+    .bottom-icon-wrap svg {
+        display: block;
+    }
+
+    .bottom-badge {
+        position: absolute;
+        top: -7px;
+        right: -9px;
+        min-width: 16px;
+        height: 16px;
+        display: inline-grid;
+        place-items: center;
+        padding: 0 4px;
+        border-radius: 999px;
+        background: #e22020;
+        color: white;
+        font-size: 0.6rem;
+        font-weight: 900;
+        line-height: 1;
+        border: 2px solid var(--card-solid);
+        box-shadow: 0 5px 12px rgba(226,32,32,0.32);
+    }
+
+    .bottom-badge[hidden] {
+        display: none;
+    }
 
     .bottom-nav a:hover,
     .bottom-nav a.active {
@@ -1362,7 +1416,6 @@ a.btn {
    ========================================================= */
 @media (max-width: 380px) {
     .topbar { padding: 8px; border-radius: 18px; }
-    .brand-mark { width: 34px; height: 34px; font-size: 0.9rem; }
 }
 
 /* ---------- Dark mode and mobile drawer refinements ---------- */
@@ -1445,6 +1498,82 @@ body.hide-bottom-nav .content {
     margin-bottom: 0;
 }
 
+.media-viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    gap: 10px;
+    padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left));
+    background: rgba(4, 10, 7, 0.92);
+    color: white;
+}
+
+.media-viewer[hidden] {
+    display: none;
+}
+
+.media-viewer-stage {
+    min-height: 0;
+    display: grid;
+    place-items: center;
+    overflow: auto;
+}
+
+.media-viewer-stage img,
+.media-viewer-stage video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.media-viewer.zoomed .media-viewer-stage {
+    place-items: start center;
+}
+
+.media-viewer.zoomed .media-viewer-stage img {
+    max-width: none;
+    max-height: none;
+    width: min(1600px, 180vw);
+}
+
+.media-viewer-close,
+.media-viewer-zoom,
+.media-viewer-download {
+    justify-self: end;
+    min-height: 40px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    color: white;
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.media-viewer-close {
+    width: 42px;
+    padding: 0;
+    font-size: 1.5rem;
+}
+
+.media-viewer-zoom {
+    position: absolute;
+    top: max(14px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+}
+
+.media-viewer-download {
+    justify-self: center;
+    text-decoration: none;
+}
+
+[data-lightbox-src] {
+    cursor: zoom-in;
+}
+
 @media (max-width: 768px) {
     .theme-toggle,
     .profile-menu { width: 100%; }
@@ -1505,12 +1634,55 @@ body.hide-bottom-nav .content {
         text-overflow: ellipsis;
     }
 
-    .bottom-nav a span {
-        font-size: 0.62rem;
+    .bottom-nav {
+        min-height: 62px;
+        padding: 6px max(4px, env(safe-area-inset-left)) calc(6px + env(safe-area-inset-bottom)) max(4px, env(safe-area-inset-right));
+    }
+
+    .bottom-nav a {
+        min-height: 44px;
+        border-radius: 10px;
+        gap: 2px;
+        font-size: 0.56rem;
+    }
+
+    .bottom-nav a svg,
+    .bottom-nav a .nav-icon,
+    .bottom-icon-wrap {
+        width: 18px;
+        height: 18px;
+    }
+
+    .bottom-nav a > span:not(.bottom-icon-wrap):not(.bottom-badge),
+    .bottom-nav .bottom-post span {
+        font-size: 0.56rem;
         max-width: 100%;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+}
+
+@media (max-width: 340px) {
+    .bottom-nav {
+        padding-left: max(2px, env(safe-area-inset-left));
+        padding-right: max(2px, env(safe-area-inset-right));
+    }
+
+    .bottom-nav a {
+        font-size: 0.5rem;
+    }
+
+    .bottom-nav a svg,
+    .bottom-nav a .nav-icon,
+    .bottom-icon-wrap {
+        width: 16px;
+        height: 16px;
+    }
+
+    .bottom-nav a > span:not(.bottom-icon-wrap):not(.bottom-badge),
+    .bottom-nav .bottom-post span {
+        font-size: 0.5rem;
     }
 }
 

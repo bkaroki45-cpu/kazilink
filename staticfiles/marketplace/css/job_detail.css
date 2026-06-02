@@ -31,7 +31,18 @@
 .meta-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 20px 0; }
 .meta-grid span { padding: 14px; background: #f6fbf8; border-radius: 14px; color: var(--muted); border: 1px solid rgba(0,196,106,.08); }
 .meta-grid b { display: block; color: var(--ink); margin-top: 5px; }
-.detail-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.detail-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.detail-actions .btn {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+}
 .detail-map-panel {
     border: 1px solid var(--line);
     border-radius: 20px;
@@ -139,6 +150,7 @@
 @media (max-width: 560px) {
     .detail-layout { padding: 14px 10px; }
     .meta-grid { grid-template-columns: 1fr; }
+    .detail-actions { grid-template-columns: 1fr; }
     .detail-actions .btn,
     .detail-actions form,
     .detail-actions button { width: 100%; }

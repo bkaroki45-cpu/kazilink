@@ -1,7 +1,7 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}Chat | KaziLink{% endblock %}
+{% block title %}Chat | KaziSite{% endblock %}
 {% block body_class %}hide-bottom-nav{% endblock %}
 
 {% block page_css %}
@@ -21,7 +21,7 @@
                 {% for participant in conversation.participants.all %}
                     {% if participant != user %}
                         {% if participant.profile.avatar %}
-                            <img src="{{ participant.profile.avatar.url }}" alt="{{ participant.username }}">
+                            <img src="{{ participant.profile.avatar.url }}" alt="{{ participant.username }}" data-lightbox-src="{{ participant.profile.avatar.url }}" data-lightbox-type="image">
                         {% else %}
                             {{ participant.username|first|upper }}
                         {% endif %}
@@ -39,7 +39,7 @@
                 </h1>
                 <div class="status">
                     <span class="online-dot"></span>
-                    <span data-typing-status>Online now</span>
+                    <span>Available to chat</span>
                 </div>
             </div>
         </div>
@@ -49,7 +49,6 @@
         class="messages-pane"
         data-chat-pane
         data-chat-url="{% url 'chat_messages_api' conversation.id %}"
-        data-typing-url="{% url 'chat_typing_api' conversation.id %}"
     >
         {% for message in visible_messages %}
             <div class="message-row {% if message.sender == user %}mine{% endif %}" data-message-row>
@@ -87,13 +86,23 @@
                             <p>{{ message.body }}</p>
                         {% endif %}
                         {% if message.image %}
-                            <img src="{{ message.image.url }}" alt="attachment">
+                            <img src="{{ message.image.url }}" alt="Chat image" data-lightbox-src="{{ message.image.url }}" data-lightbox-type="image">
                         {% endif %}
                         {% if message.voice_note %}
                             <audio controls src="{{ message.voice_note.url }}"></audio>
+                            <a class="file-link" href="{{ message.voice_note.url }}" download>Audio - Download</a>
                         {% endif %}
                         {% if message.attachment %}
-                            <a class="file-link" href="{{ message.attachment.url }}">Attachment</a>
+                            {% if message.attachment_kind == 'image' %}
+                                <img src="{{ message.attachment.url }}" alt="{{ message.attachment_name }}" data-lightbox-src="{{ message.attachment.url }}" data-lightbox-type="image">
+                            {% elif message.attachment_kind == 'video' %}
+                                <video class="chat-video" controls src="{{ message.attachment.url }}" data-lightbox-src="{{ message.attachment.url }}" data-lightbox-type="video"></video>
+                            {% elif message.attachment_kind == 'audio' %}
+                                <audio controls src="{{ message.attachment.url }}"></audio>
+                            {% endif %}
+                            <a class="file-link" href="{{ message.attachment.url }}" download>
+                                {{ message.attachment_kind|title|default:'File' }} - {{ message.attachment_name|default:'Download attachment' }}
+                            </a>
                         {% endif %}
                     {% endif %}
 
@@ -112,9 +121,6 @@
                 </article>
             </div>
         {% endfor %}
-        <div class="typing-indicator" data-typing-indicator hidden>
-            <span></span><span></span><span></span>
-        </div>
     </section>
 
     <form class="message-box" method="post" enctype="multipart/form-data">

@@ -7,6 +7,22 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_local_env(path):
+    if not path.exists():
+        return
+    for raw_line in path.read_text().splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip("'").strip('"')
+        os.environ.setdefault(key, value)
+
+
+load_local_env(BASE_DIR / ".env")
+
+
 # ==========================
 # SECURITY
 # ==========================
@@ -199,4 +215,29 @@ SECURE_PROXY_SSL_HEADER = (
 
 SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "False") == "True"
 CSRF_COOKIE_SECURE = os.environ.get("CSRF_COOKIE_SECURE", "False") == "True"
+
+
+# ==========================
+# WEB PUSH NOTIFICATIONS
+# ==========================
+
+WEBPUSH_PUBLIC_KEY = os.environ.get("WEBPUSH_PUBLIC_KEY", "")
+WEBPUSH_PRIVATE_KEY = os.environ.get("WEBPUSH_PRIVATE_KEY", "")
+WEBPUSH_CLAIM_EMAIL = os.environ.get("WEBPUSH_CLAIM_EMAIL", "mailto:admin@kazisite.local")
+
+
+# ==========================
+# EMAIL / PASSWORD RESET OTP
+# ==========================
+
+EMAIL_BACKEND = os.environ.get(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend",
+)
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "in-v3.mailjet.com")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "no-reply@kazisite.local")
 

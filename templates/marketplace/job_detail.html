@@ -1,15 +1,18 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
-{% block title %}{{ job.title }} | KaziLink{% endblock %}
+{% block title %}{{ job.title }} | KaziSite{% endblock %}
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'marketplace/css/job_detail.css' %}">
 {% endblock %}
 {% block content %}
 <main class="detail-layout">
     <article class="job-detail">
-        {% if job.photo %}<img class="detail-media" src="{{ job.photo.url }}" alt="{{ job.title }}">{% endif %}
-        {% if job.video %}<video class="detail-media" controls src="{{ job.video.url }}"></video>{% endif %}
+        {% if job.photo %}<img class="detail-media" src="{{ job.photo.url }}" alt="{{ job.title }}" data-lightbox-src="{{ job.photo.url }}" data-lightbox-type="image">{% endif %}
+        {% if job.video %}<video class="detail-media" controls src="{{ job.video.url }}" data-lightbox-src="{{ job.video.url }}" data-lightbox-type="video"></video>{% endif %}
         {% if job.audio %}<audio controls src="{{ job.audio.url }}"></audio>{% endif %}
+        {% if job.is_taken %}
+            <div class="taken-banner">Taken</div>
+        {% endif %}
         <span class="tag">{{ job.get_job_type_display }}</span>
         <h1>{{ job.title }}</h1>
         <p>{{ job.description }}</p>
@@ -33,7 +36,7 @@
                     </select>
                 </label>
                 <button class="btn primary">Save Status</button>
-                <small>When marked Taken or Closed, this job disappears from the public feed.</small>
+                <small>Taken jobs stay visible; closed jobs are hidden.</small>
             </form>
             {% if job.status != 'taken' %}
                 <form class="quick-status" method="post" action="{% url 'update_job_status' job.pk %}">
@@ -44,8 +47,6 @@
             {% endif %}
         {% endif %}
         <div class="detail-actions">
-            <form method="post" action="{% url 'toggle_like' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_liked %}Liked{% else %}Like{% endif %}</button></form>
-            <form method="post" action="{% url 'toggle_save' job.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="btn ghost">{% if is_saved %}Saved{% else %}Save{% endif %}</button></form>
             {% if user != job.employer %}
                 <a class="btn ghost" href="{% url 'start_conversation' job.employer.username %}">Message Employer</a>
             {% else %}
@@ -63,7 +64,7 @@
                 {% endif %}
             </span>
             <strong>{{ job.employer.username }}</strong>
-            <small>{{ job.employer.profile.location|default:'KaziLink member' }}</small>
+            <small>{{ job.employer.profile.location|default:'KaziSite member' }}</small>
         </a>
         {% if user != job.employer %}
             <form class="follow-inline" method="post" action="{% url 'toggle_follow' job.employer.username %}">
@@ -77,13 +78,6 @@
         {% else %}
             <a class="btn primary full" href="{% url 'inbox' %}">Open Messages</a>
         {% endif %}
-        <section class="comments">
-            <h2>Comments</h2>
-            <form method="post">{% csrf_token %}{{ comment_form.body }}<button class="btn mini">Comment</button></form>
-            {% for comment in job.comments.all %}
-                <p><strong>{{ comment.user.username }}</strong> {{ comment.body }}</p>
-            {% endfor %}
-        </section>
     </aside>
 </main>
 {% endblock %}

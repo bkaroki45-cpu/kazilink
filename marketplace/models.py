@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from pathlib import PurePath
 
 
 class Profile(models.Model):
@@ -94,6 +95,7 @@ class Job(models.Model):
     audio = models.FileField(upload_to='jobs/audio/', blank=True)
     document = models.FileField(upload_to='jobs/documents/', blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPEN)
+    taken_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='taken_jobs')
     tags = models.CharField(max_length=200, blank=True)
     views = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -111,6 +113,57 @@ class Job(models.Model):
     @property
     def is_visible(self):
         return self.status == self.OPEN
+
+    @property
+    def is_taken(self):
+        return self.status == self.TAKEN
+
+
+class AttachmentPost(models.Model):
+    INTERNSHIP = 'internship'
+    ATTACHMENT = 'attachment'
+    TYPE_CHOICES = (
+        (INTERNSHIP, 'Internship'),
+        (ATTACHMENT, 'Attachment'),
+    )
+    OPEN = 'open'
+    TAKEN = 'taken'
+    CLOSED = 'closed'
+    STATUS_CHOICES = (
+        (OPEN, 'Open'),
+        (TAKEN, 'Taken'),
+        (CLOSED, 'Closed'),
+    )
+
+    poster = models.ForeignKey(User, on_delete=models.CASCADE, related_name='attachment_posts')
+    title = models.CharField(max_length=160)
+    description = models.TextField()
+    opportunity_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default=ATTACHMENT)
+    organization = models.CharField(max_length=160, blank=True)
+    location = models.CharField(max_length=140)
+    deadline = models.DateField(null=True, blank=True)
+    contact_information = models.CharField(max_length=160)
+    required_skills = models.CharField(max_length=255, blank=True)
+    photo = models.ImageField(upload_to='attachments/photos/', blank=True)
+    document = models.FileField(upload_to='attachments/documents/', blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=OPEN)
+    taken_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='taken_attachments')
+    views = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    def get_absolute_url(self):
+        return reverse('attachment_detail', kwargs={'pk': self.pk})
+
+    @property
+    def is_taken(self):
+        return self.status == self.TAKEN
 
 
 class JobLike(models.Model):
@@ -162,6 +215,22 @@ class Comment(models.Model):
         ordering = ['created_at']
 
 
+class JobReview(models.Model):
+    job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='job_reviews')
+    rating = models.PositiveSmallIntegerField(default=5)
+    body = models.TextField()
+    positive = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ('job', 'reviewer')
+
+    def __str__(self):
+        return f'{self.reviewer.username} review for {self.job}'
+
+
 class Application(models.Model):
     PENDING = 'pending'
     ACCEPTED = 'accepted'
@@ -206,6 +275,33 @@ class Message(models.Model):
     class Meta:
         ordering = ['created_at']
 
+    @property
+    def attachment_name(self):
+        if not self.attachment:
+            return ''
+        return PurePath(self.attachment.name).name
+
+    @property
+    def attachment_kind(self):
+        if not self.attachment:
+            return ''
+        suffix = PurePath(self.attachment.name).suffix.lower().lstrip('.')
+        if suffix in {'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'avif'}:
+            return 'image'
+        if suffix in {'mp4', 'webm', 'mov', 'm4v', 'avi', 'mkv'}:
+            return 'video'
+        if suffix in {'mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'}:
+            return 'audio'
+        if suffix == 'pdf':
+            return 'pdf'
+        if suffix in {'doc', 'docx', 'txt', 'rtf', 'odt'}:
+            return 'document'
+        if suffix in {'xls', 'xlsx', 'csv'}:
+            return 'spreadsheet'
+        if suffix in {'ppt', 'pptx'}:
+            return 'presentation'
+        return 'file'
+
 
 class Review(models.Model):
     reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='written_reviews')
@@ -230,6 +326,34 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='password_reset_otps')
+    code = models.CharField(max_length=6)
+    used = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def is_valid(self, code):
+        return not self.used and self.code == code and self.expires_at >= timezone.now()
+
+
+class PushSubscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='push_subscriptions')
+    endpoint = models.URLField(max_length=600, unique=True)
+    p256dh = models.CharField(max_length=255)
+    auth = models.CharField(max_length=255)
+    user_agent = models.CharField(max_length=255, blank=True)
+    active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-updated_at']
 
 
 class Follow(models.Model):

@@ -1,7 +1,7 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}Login | KaziLink{% endblock %}
+{% block title %}Login | KaziSite{% endblock %}
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'marketplace/css/login.css' %}">
@@ -15,7 +15,7 @@
 
         <div class="auth-brand">
             <span class="brand-mark">K</span>
-            <span class="brand-name">KaziLink</span>
+            <span class="brand-name">KaziSite</span>
         </div>
 
         <div class="showcase-content">
@@ -25,7 +25,7 @@
 
             <h2>
                 Welcome back to
-                <span>KaziLink</span>
+                <span>KaziSite</span>
             </h2>
 
             <p>
@@ -87,7 +87,7 @@
             {% endfor %}
 
             <div class="forgot-wrap">
-                <a href="#">
+                <a href="{% url 'password_reset_request' %}">
                     Forgot password?
                 </a>
             </div>

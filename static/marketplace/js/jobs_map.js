@@ -47,7 +47,7 @@ function getLiveUserPoint(onSuccess, onError) {
         onSuccess(point);
     }, (error) => {
         console.warn('GPS permission or location error:', error.message);
-        onError('Please enable location access so KaziLink can show where you are on the map.');
+        onError('Please enable location access so KaziSite can show where you are on the map.');
     }, liveGpsOptions());
 }
 
@@ -92,11 +92,11 @@ function markerElement(className, label) {
 
 function addDetailedBuildingLayer(map) {
     const sourceId = map.getSource('openmaptiles') ? 'openmaptiles' : Object.keys(map.getStyle().sources || {})[0];
-    if (!sourceId || map.getLayer('kazilink-building-extrusions')) return;
+    if (!sourceId || map.getLayer('kazisite-building-extrusions')) return;
 
     try {
         map.addLayer({
-            id: 'kazilink-building-extrusions',
+            id: 'kazisite-building-extrusions',
             type: 'fill-extrusion',
             source: sourceId,
             'source-layer': 'building',
@@ -189,9 +189,9 @@ function createRoutePanel(map) {
 }
 
 function clearRoute(map) {
-    if (map.getLayer('kazilink-route-line')) map.removeLayer('kazilink-route-line');
-    if (map.getLayer('kazilink-route-casing')) map.removeLayer('kazilink-route-casing');
-    if (map.getSource('kazilink-route')) map.removeSource('kazilink-route');
+    if (map.getLayer('kazisite-route-line')) map.removeLayer('kazisite-route-line');
+    if (map.getLayer('kazisite-route-casing')) map.removeLayer('kazisite-route-casing');
+    if (map.getSource('kazisite-route')) map.removeSource('kazisite-route');
 }
 
 async function drawRoute(map, routeState, userPoint, jobPoint) {
@@ -209,7 +209,7 @@ async function drawRoute(map, routeState, userPoint, jobPoint) {
         const route = data.routes && data.routes[0];
         if (!route) throw new Error('No OSRM route found');
 
-        map.addSource('kazilink-route', {
+        map.addSource('kazisite-route', {
             type: 'geojson',
             data: {
                 type: 'Feature',
@@ -218,9 +218,9 @@ async function drawRoute(map, routeState, userPoint, jobPoint) {
             },
         });
         map.addLayer({
-            id: 'kazilink-route-casing',
+            id: 'kazisite-route-casing',
             type: 'line',
-            source: 'kazilink-route',
+            source: 'kazisite-route',
             paint: {
                 'line-color': '#ffffff',
                 'line-width': 8,
@@ -228,9 +228,9 @@ async function drawRoute(map, routeState, userPoint, jobPoint) {
             },
         });
         map.addLayer({
-            id: 'kazilink-route-line',
+            id: 'kazisite-route-line',
             type: 'line',
-            source: 'kazilink-route',
+            source: 'kazisite-route',
             paint: {
                 'line-color': '#0f7cff',
                 'line-width': 5,
@@ -241,7 +241,7 @@ async function drawRoute(map, routeState, userPoint, jobPoint) {
         fitMap(map, [userPoint, jobPoint], jobPoint);
     } catch (error) {
         console.warn('Road route unavailable.', error);
-        map.addSource('kazilink-route', {
+        map.addSource('kazisite-route', {
             type: 'geojson',
             data: {
                 type: 'Feature',
@@ -253,9 +253,9 @@ async function drawRoute(map, routeState, userPoint, jobPoint) {
             },
         });
         map.addLayer({
-            id: 'kazilink-route-line',
+            id: 'kazisite-route-line',
             type: 'line',
-            source: 'kazilink-route',
+            source: 'kazisite-route',
             paint: {
                 'line-color': '#0f7cff',
                 'line-width': 4,
@@ -313,7 +313,7 @@ function haversineKm(fromPoint, toPoint) {
 function updateJobCardsForPlace(placePoint, radiusKm) {
     const rows = [];
     document.querySelectorAll('[data-job-card]').forEach((card) => {
-        const job = window.kazilinkJobsById?.get(card.dataset.jobCard);
+        const job = window.kazisiteJobsById?.get(card.dataset.jobCard);
         const point = job ? normalizePoint(job.lat, job.lng, true) : null;
         if (!point) {
             card.hidden = true;
@@ -387,7 +387,7 @@ async function nominatimSearch(query) {
 
 async function serverGeocodeSearch(query) {
     const response = await fetch(`/api/geocode/?q=${encodeURIComponent(query)}`);
-    if (!response.ok) throw new Error('KaziLink geocoder failed');
+    if (!response.ok) throw new Error('KaziSite geocoder failed');
     const data = await response.json();
     return (data.results || []).map((item) => ({
         name: item.name,
@@ -525,7 +525,7 @@ function initJobsMap() {
 
     const jobs = JSON.parse(dataEl.textContent);
     const jobsById = new Map(jobs.map((job) => [String(job.id), job]));
-    window.kazilinkJobsById = jobsById;
+    window.kazisiteJobsById = jobsById;
 
     const map = createMap(el);
     const markers = [];

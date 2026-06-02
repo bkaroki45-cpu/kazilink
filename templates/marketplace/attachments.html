@@ -1,0 +1,60 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block title %}Attachments & Internships | KaziSite{% endblock %}
+{% block mobile_title %}Attachment{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/feed.css' %}">
+<link rel="stylesheet" href="{% static 'marketplace/css/find_jobs.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="search-page">
+    <aside class="filters" id="filter-panel">
+        <div class="filters-collapse open" id="filters-collapse">
+            <div class="filters-header">
+                <h1>Attachment &amp; Internship</h1>
+                <p>Attachment and internship opportunities for students.</p>
+            </div>
+
+            <a class="btn primary full" href="{% url 'post_attachment' %}">Post Attachment / Internship</a>
+
+            <form method="get" data-filter-form>
+                <div class="input-group">
+                    <label for="id_q">Keyword</label>
+                    <input id="id_q" name="q" value="{{ filters.q }}" placeholder="Title, skill, organization">
+                </div>
+                <div class="input-group">
+                    <label for="id_type">Type</label>
+                    <select id="id_type" name="type">
+                        <option value="">Attachment &amp; Internship</option>
+                        {% for value,label in opportunity_types %}
+                            <option value="{{ value }}" {% if filters.type == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="id_location">Location</label>
+                    <input id="id_location" name="location" value="{{ filters.location }}" placeholder="Town, campus, company">
+                </div>
+                <button class="btn primary full" type="submit">Search</button>
+            </form>
+        </div>
+    </aside>
+
+    <section class="results">
+        <div class="results-list">
+            {% for attachment in attachments %}
+                {% include 'marketplace/partials/attachment_card.html' with attachment=attachment %}
+            {% empty %}
+                <article class="empty-state">
+                    <h2>No attachments found</h2>
+                    <p>Post the first student attachment or internship opportunity.</p>
+                    <a class="hero-cta" href="{% url 'post_attachment' %}">Post Attachment / Internship</a>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

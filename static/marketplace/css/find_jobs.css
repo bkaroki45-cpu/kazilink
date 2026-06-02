@@ -1,5 +1,5 @@
 /* ============================================================
-   KaziLink — find_jobs.css
+   KaziSite — find_jobs.css
    Refined, professional, fully responsive
    ============================================================ */
 
@@ -405,6 +405,26 @@
     min-width: 0;
     overflow: hidden;
     animation: card-in .35s ease both;
+}
+
+.result-card.is-taken {
+    border-left-color: #dc2626;
+    background: linear-gradient(90deg, #fff1f2 0%, #ffffff 32%);
+    box-shadow: 0 12px 38px rgba(127, 29, 29, 0.12);
+}
+
+.taken-ribbon {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 7px 13px;
+    border-radius: 10px;
+    background: #dc2626;
+    color: white;
+    font-size: 1rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    box-shadow: 0 12px 26px rgba(220, 38, 38, 0.26);
 }
 
 .result-card:nth-child(even) {

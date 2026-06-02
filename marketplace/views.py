@@ -1,30 +1,41 @@
 import json
 import math
+import random
 import re
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.core.cache import cache
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_GET, require_POST
+from datetime import timedelta
 
 from .forms import (
-    ActivityUpdateForm, ApplicationForm, CommentForm, JobAlertForm, JobForm, LoginForm,
-    MessageForm, ProfileForm, RegisterForm, ReviewForm,
+    ActivityUpdateForm, ApplicationForm, AttachmentPostForm, CommentForm, JobAlertForm, JobForm,
+    LoginForm, MessageForm, PasswordResetEmailForm, PasswordResetNewPasswordForm,
+    PasswordResetOTPForm, ProfileForm, RegisterForm, ReviewForm,
 )
 from .models import (
-    Application, Category, Comment, Conversation, Follow, Job, JobAlert, JobLike, Message,
-    Notification, Profile, Review, SavedJob,
+    Application, AttachmentPost, Category, Comment, Conversation, Follow, Job, JobAlert,
+    JobLike, Message, Notification, PasswordResetOTP, Profile, PushSubscription, Review, SavedJob,
 )
+
+try:
+    from pywebpush import WebPushException, webpush
+except ImportError:
+    WebPushException = Exception
+    webpush = None
 
 
 def landing(request):
@@ -46,7 +57,7 @@ def register(request):
             user.save()
             Profile.objects.create(user=user, role=Profile.SEEKER)
             login(request, user)
-            messages.success(request, 'Welcome to KaziLink. Your profile is ready.')
+            messages.success(request, 'Welcome to KaziSite. Your profile is ready.')
             next_url = request.GET.get('next')
             if next_url and url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
                 return redirect(next_url)
@@ -70,6 +81,73 @@ def login_view(request):
     return render(request, 'marketplace/login.html', {'form': form})
 
 
+def password_reset_request(request):
+    if request.method == 'POST':
+        form = PasswordResetEmailForm(request.POST)
+        if form.is_valid():
+            user = User.objects.get(email__iexact=form.cleaned_data['email'])
+            code = f'{random.randint(0, 999999):06d}'
+            PasswordResetOTP.objects.filter(user=user, used=False).update(used=True)
+            PasswordResetOTP.objects.create(
+                user=user,
+                code=code,
+                expires_at=timezone.now() + timedelta(minutes=10),
+            )
+            send_mail(
+                'KaziSite password reset OTP',
+                f'Your KaziSite password reset OTP is {code}. It expires in 10 minutes. If you do not see it, check your spam folder.',
+                getattr(settings, 'DEFAULT_FROM_EMAIL', 'no-reply@kazisite.local'),
+                [user.email],
+                fail_silently=False,
+            )
+            request.session['password_reset_user_id'] = user.id
+            messages.success(request, 'We sent a 6-digit OTP to your registered email. Check your spam folder if you do not see it.')
+            return redirect('password_reset_verify')
+    else:
+        form = PasswordResetEmailForm()
+    return render(request, 'marketplace/password_reset_request.html', {'form': form})
+
+
+def password_reset_verify(request):
+    user_id = request.session.get('password_reset_user_id')
+    if not user_id:
+        messages.info(request, 'Enter your registered email to request an OTP.')
+        return redirect('password_reset_request')
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = PasswordResetOTPForm(request.POST)
+        if form.is_valid():
+            otp = user.password_reset_otps.filter(used=False).first()
+            if otp and otp.is_valid(form.cleaned_data['code']):
+                request.session['password_reset_verified'] = True
+                return redirect('password_reset_confirm')
+            form.add_error('code', 'Invalid or expired OTP.')
+    else:
+        form = PasswordResetOTPForm()
+    return render(request, 'marketplace/password_reset_verify.html', {'form': form, 'email': user.email})
+
+
+def password_reset_confirm(request):
+    user_id = request.session.get('password_reset_user_id')
+    verified = request.session.get('password_reset_verified')
+    if not user_id or not verified:
+        messages.info(request, 'Verify your OTP before choosing a new password.')
+        return redirect('password_reset_request')
+    user = get_object_or_404(User, id=user_id)
+    if request.method == 'POST':
+        form = PasswordResetNewPasswordForm(user, request.POST)
+        if form.is_valid():
+            form.save()
+            user.password_reset_otps.filter(used=False).update(used=True)
+            request.session.pop('password_reset_user_id', None)
+            request.session.pop('password_reset_verified', None)
+            messages.success(request, 'Password updated. You can log in now.')
+            return redirect('login')
+    else:
+        form = PasswordResetNewPasswordForm(user)
+    return render(request, 'marketplace/password_reset_confirm.html', {'form': form})
+
+
 def logout_view(request):
     logout(request)
     return redirect('landing')
@@ -77,6 +155,32 @@ def logout_view(request):
 
 def _open_jobs():
     return Job.objects.filter(status=Job.OPEN).select_related('employer', 'employer__profile', 'category')
+
+
+def _visible_jobs():
+    return Job.objects.filter(status__in=[Job.OPEN, Job.TAKEN]).select_related(
+        'employer', 'employer__profile', 'category', 'taken_by', 'taken_by__profile',
+    )
+
+
+def _visible_attachments():
+    return AttachmentPost.objects.filter(status__in=[AttachmentPost.OPEN, AttachmentPost.TAKEN]).select_related(
+        'poster', 'poster__profile', 'taken_by', 'taken_by__profile',
+    )
+
+
+def _profile_for(user):
+    try:
+        return user.profile
+    except Profile.DoesNotExist:
+        return None
+
+
+def _profile_point(user):
+    profile = _profile_for(user)
+    if not profile or not profile.latitude or not profile.longitude:
+        return None
+    return profile.latitude, profile.longitude
 
 
 KENYA_BOUNDS = {
@@ -304,7 +408,7 @@ def _place_rank(result, original_query, provider):
 
 
 def _fetch_json(url, user_agent=True):
-    headers = {'User-Agent': 'KaziLink/1.0 local job geocoder'} if user_agent else {}
+    headers = {'User-Agent': 'KaziSite/1.0 local job geocoder'} if user_agent else {}
     with urlopen(Request(url, headers=headers), timeout=6) as response:
         return json.loads(response.read().decode('utf-8'))
 
@@ -576,25 +680,85 @@ def matching_alert_jobs(user):
     return matches
 
 
+def unread_chat_message_count(user):
+    return Message.objects.filter(
+        conversation__participants=user,
+        seen=False,
+    ).exclude(sender=user).count()
+
+
+def unread_chat_thread_count(user):
+    return Message.objects.filter(
+        conversation__participants=user,
+        seen=False,
+    ).exclude(sender=user).values('conversation_id').distinct().count()
+
+
 def notify_matching_alerts(job):
     for alert in JobAlert.objects.filter(active=True).select_related('user', 'category'):
         if alert.user_id == job.employer_id:
             continue
         if alert_matches_job(alert, job):
-            Notification.objects.create(
-                user=alert.user,
-                title='New job alert match',
-                body=f'{job.title} matches your saved alert near {alert.location or job.location}.',
-                url=job.get_absolute_url(),
+            create_notification(
+                alert.user,
+                'New job alert match',
+                f'{job.title} matches your saved alert near {alert.location or job.location}.',
+                job.get_absolute_url(),
             )
+
+
+def send_push_notification(user, title, body='', url=''):
+    public_key = getattr(settings, 'WEBPUSH_PUBLIC_KEY', '')
+    private_key = getattr(settings, 'WEBPUSH_PRIVATE_KEY', '')
+    if not webpush or not public_key or not private_key:
+        return
+
+    payload = json.dumps({
+        'title': title,
+        'body': body,
+        'url': url or reverse('notifications'),
+    })
+    subscriptions = user.push_subscriptions.filter(active=True)
+    for subscription in subscriptions:
+        try:
+            webpush(
+                subscription_info={
+                    'endpoint': subscription.endpoint,
+                    'keys': {
+                        'p256dh': subscription.p256dh,
+                        'auth': subscription.auth,
+                    },
+                },
+                data=payload,
+                vapid_private_key=private_key,
+                vapid_claims={'sub': getattr(settings, 'WEBPUSH_CLAIM_EMAIL', 'mailto:admin@kazisite.local')},
+            )
+        except WebPushException:
+            subscription.active = False
+            subscription.save(update_fields=['active'])
+
+
+def create_notification(user, title, body='', url=''):
+    notification = Notification.objects.create(user=user, title=title, body=body, url=url)
+    send_push_notification(user, title, body, url)
+    return notification
 
 
 @login_required
 def feed(request):
-    jobs = _open_jobs().annotate(like_count=Count('likes'), comment_count=Count('comments')).order_by('-created_at')
-    paginator = Paginator(jobs, 8)
+    jobs = list(_visible_jobs().annotate(like_count=Count('likes'), comment_count=Count('comments')))
+    attachments = list(_visible_attachments())
+    for job in jobs:
+        job.feed_type = 'job'
+        job.feed_created_at = job.created_at
+    for attachment in attachments:
+        attachment.feed_type = 'attachment'
+        attachment.feed_created_at = attachment.created_at
+    posts = jobs + attachments
+    random.shuffle(posts)
+    paginator = Paginator(posts, 8)
     page_obj = paginator.get_page(request.GET.get('page'))
-    trending = _open_jobs().annotate(app_count=Count('applications')).order_by('-app_count', '-created_at')[:5]
+    trending = _visible_jobs().annotate(app_count=Count('applications')).order_by('-app_count', '?')[:5]
     saved_ids = set(SavedJob.objects.filter(user=request.user).values_list('job_id', flat=True))
     liked_ids = set(JobLike.objects.filter(user=request.user).values_list('job_id', flat=True))
     return render(request, 'marketplace/feed.html', {
@@ -621,14 +785,14 @@ def post_job(request):
             job.longitude = point['lng']
             job.resolved_place_name = point['label']
             job.save()
-            Notification.objects.create(
+            create_notification(
                 user=request.user,
                 title='Job posted',
                 body=f'{job.title} is now visible while open.',
                 url=job.get_absolute_url(),
             )
             notify_matching_alerts(job)
-            messages.success(request, 'Your job is live on KaziLink.')
+            messages.success(request, 'Your job is live on KaziSite.')
             return redirect(job)
     else:
         form = JobForm()
@@ -636,8 +800,78 @@ def post_job(request):
 
 
 @login_required
+def post_attachment(request):
+    if request.method == 'POST':
+        form = AttachmentPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            attachment = form.save(commit=False)
+            attachment.poster = request.user
+            attachment.save()
+            create_notification(
+                user=request.user,
+                title='Attachment posted',
+                body=f'{attachment.title} is now visible while open.',
+                url=attachment.get_absolute_url(),
+            )
+            messages.success(request, 'Your attachment/internship opportunity is live.')
+            return redirect(attachment)
+    else:
+        form = AttachmentPostForm()
+    return render(request, 'marketplace/post_attachment.html', {'form': form})
+
+
+@login_required
+def attachments(request):
+    posts = _visible_attachments().order_by('?')
+    query = request.GET.get('q', '').strip()
+    opportunity_type = request.GET.get('type', '')
+    location = request.GET.get('location', '').strip()
+
+    if query:
+        posts = posts.filter(Q(title__icontains=query) | Q(description__icontains=query) | Q(required_skills__icontains=query) | Q(organization__icontains=query))
+    if opportunity_type:
+        posts = posts.filter(opportunity_type=opportunity_type)
+    if location:
+        posts = posts.filter(location__icontains=location)
+
+    return render(request, 'marketplace/attachments.html', {
+        'attachments': posts,
+        'filters': request.GET,
+        'opportunity_types': AttachmentPost.TYPE_CHOICES,
+    })
+
+
+@login_required
+def attachment_detail(request, pk):
+    attachment = get_object_or_404(_visible_attachments(), pk=pk)
+    attachment.views = attachment.views + 1
+    attachment.save(update_fields=['views'])
+    return render(request, 'marketplace/attachment_detail.html', {
+        'attachment': attachment,
+        'status_choices': AttachmentPost.STATUS_CHOICES,
+    })
+
+
+@login_required
+@require_POST
+def update_attachment_status(request, pk):
+    attachment = get_object_or_404(AttachmentPost, pk=pk, poster=request.user)
+    status = request.POST.get('status')
+    if status in dict(AttachmentPost.STATUS_CHOICES):
+        attachment.status = status
+        if status == AttachmentPost.TAKEN and not attachment.taken_by:
+            attachment.taken_by = request.user
+            attachment.save(update_fields=['status', 'taken_by'])
+        else:
+            attachment.save(update_fields=['status'])
+        messages.success(request, f'Attachment status updated to {attachment.get_status_display()}.')
+    return redirect(attachment)
+
+
+@login_required
 def find_jobs(request):
-    jobs = _open_jobs()
+    jobs = _visible_jobs()
+    user_point = _profile_point(request.user)
     query = request.GET.get('q', '').strip()
     category = request.GET.get('category', '')
     location = request.GET.get('location', '').strip()
@@ -673,26 +907,27 @@ def find_jobs(request):
                     filtered_jobs.append(job)
             else:
                 job.distance = None
-        jobs = sorted(filtered_jobs, key=lambda item: item.created_at, reverse=True)
-    elif nearby and request.user.profile.latitude and request.user.profile.longitude:
+        random.shuffle(filtered_jobs)
+        jobs = filtered_jobs
+    elif nearby and user_point:
         jobs = list(jobs)
         for job in jobs:
             point = ensure_job_coordinates(job)
             job.map_point = point
             if point:
-                job.distance = round(distance_km(request.user.profile.latitude, request.user.profile.longitude, point['lat'], point['lng']), 1)
+                job.distance = round(distance_km(user_point[0], user_point[1], point['lat'], point['lng']), 1)
             else:
                 job.distance = None
-        jobs.sort(key=lambda item: item.created_at, reverse=True)
+        random.shuffle(jobs)
     elif sort == 'popular':
-        jobs = jobs.annotate(app_count=Count('applications')).order_by('-app_count')
+        jobs = jobs.annotate(app_count=Count('applications')).order_by('-app_count', '?')
     else:
-        jobs = jobs.order_by('-created_at')
+        jobs = jobs.order_by('?')
 
     return render(request, 'marketplace/find_jobs.html', {
         'jobs': jobs,
-        'user_latitude': float(request.user.profile.latitude) if request.user.profile.latitude else None,
-        'user_longitude': float(request.user.profile.longitude) if request.user.profile.longitude else None,
+        'user_latitude': float(user_point[0]) if user_point else None,
+        'user_longitude': float(user_point[1]) if user_point else None,
         'categories': Category.objects.all(),
         'job_types': Job.TYPE_CHOICES,
         'alert_form': JobAlertForm(initial={
@@ -755,8 +990,9 @@ def geocode_api(request):
 
 @login_required
 def job_detail(request, pk):
-    job = get_object_or_404(Job.objects.select_related('employer', 'employer__profile', 'category'), pk=pk)
-    if job.status != Job.OPEN and job.employer != request.user:
+    job = get_object_or_404(Job.objects.select_related('employer', 'employer__profile', 'category', 'taken_by', 'taken_by__profile'), pk=pk)
+    user_point = _profile_point(request.user)
+    if job.status == Job.CLOSED and job.employer != request.user:
         messages.info(request, 'That job is no longer available.')
         return redirect('feed')
     if request.method == 'POST':
@@ -791,8 +1027,8 @@ def job_detail(request, pk):
         'job_latitude': map_point['lat'] if map_point else None,
         'job_longitude': map_point['lng'] if map_point else None,
         'job_location_source': map_point['label'] if map_point else '',
-        'user_latitude': float(request.user.profile.latitude) if request.user.profile.latitude else None,
-        'user_longitude': float(request.user.profile.longitude) if request.user.profile.longitude else None,
+        'user_latitude': float(user_point[0]) if user_point else None,
+        'user_longitude': float(user_point[1]) if user_point else None,
     })
 
 
@@ -803,7 +1039,11 @@ def update_job_status(request, pk):
     status = request.POST.get('status')
     if status in dict(Job.STATUS_CHOICES):
         job.status = status
-        job.save(update_fields=['status'])
+        if status == Job.TAKEN and not job.taken_by:
+            job.taken_by = request.user
+            job.save(update_fields=['status', 'taken_by'])
+        else:
+            job.save(update_fields=['status'])
         messages.success(request, f'Job status updated to {job.get_status_display()}.')
     return redirect(job)
 
@@ -964,7 +1204,12 @@ def chat_room(request, conversation_id):
             msg.save()
             conversation.save()
             for participant in conversation.participants.exclude(id=request.user.id):
-                Notification.objects.create(user=participant, title='New message', body=request.user.username, url=reverse('chat_room', kwargs={'conversation_id': conversation.id}))
+                create_notification(
+                    participant,
+                    'New message',
+                    f'{request.user.username}: {msg.body[:80]}' if msg.body else f'{request.user.username} sent an attachment',
+                    reverse('inbox'),
+                )
             return redirect('chat_room', conversation_id=conversation.id)
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(seen=True)
     visible_messages = conversation.messages.select_related('sender', 'sender__profile').exclude(hidden_for=request.user)
@@ -979,11 +1224,6 @@ def chat_room(request, conversation_id):
 def chat_messages_api(request, conversation_id):
     conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
     Message.objects.filter(conversation=conversation).exclude(sender=request.user).update(seen=True)
-    other_typing = False
-    for participant_id in conversation.participants.exclude(id=request.user.id).values_list('id', flat=True):
-        if cache.get(f'chat_typing:{conversation.id}:{participant_id}'):
-            other_typing = True
-            break
     messages_payload = [
         {
             'id': message.id,
@@ -993,6 +1233,8 @@ def chat_messages_api(request, conversation_id):
             'image': message.image.url if message.image else '',
             'voice_note': message.voice_note.url if message.voice_note else '',
             'attachment': message.attachment.url if message.attachment else '',
+            'attachment_name': message.attachment_name,
+            'attachment_kind': message.attachment_kind,
             'time': message.created_at.strftime('%H:%M'),
             'seen': message.seen,
             'deleted': message.deleted_for_everyone,
@@ -1002,20 +1244,61 @@ def chat_messages_api(request, conversation_id):
         }
         for message in conversation.messages.select_related('sender', 'sender__profile').exclude(hidden_for=request.user)
     ]
-    return JsonResponse({'messages': messages_payload, 'typing': other_typing})
+    return JsonResponse({'messages': messages_payload})
+
+
+@login_required
+@require_GET
+def push_config_api(request):
+    return JsonResponse({
+        'public_key': getattr(settings, 'WEBPUSH_PUBLIC_KEY', ''),
+        'enabled': bool(getattr(settings, 'WEBPUSH_PUBLIC_KEY', '') and getattr(settings, 'WEBPUSH_PRIVATE_KEY', '')),
+    })
 
 
 @login_required
 @require_POST
-def chat_typing_api(request, conversation_id):
-    conversation = get_object_or_404(Conversation, id=conversation_id, participants=request.user)
-    is_typing = request.POST.get('typing') == '1'
-    key = f'chat_typing:{conversation.id}:{request.user.id}'
-    if is_typing:
-        cache.set(key, True, 4)
-    else:
-        cache.delete(key)
+def save_push_subscription(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'ok': False, 'error': 'Invalid subscription'}, status=400)
+
+    endpoint = data.get('endpoint')
+    keys = data.get('keys') or {}
+    if not endpoint or not keys.get('p256dh') or not keys.get('auth'):
+        return JsonResponse({'ok': False, 'error': 'Incomplete subscription'}, status=400)
+
+    PushSubscription.objects.update_or_create(
+        endpoint=endpoint,
+        defaults={
+            'user': request.user,
+            'p256dh': keys['p256dh'],
+            'auth': keys['auth'],
+            'user_agent': request.headers.get('user-agent', '')[:255],
+            'active': True,
+        },
+    )
     return JsonResponse({'ok': True})
+
+
+@login_required
+@require_GET
+def notification_status_api(request):
+    unread_notifications = request.user.notifications.filter(read=False).count()
+    unread_chats = unread_chat_message_count(request.user)
+    latest = request.user.notifications.filter(read=False).first()
+    return JsonResponse({
+        'unread_notifications': unread_notifications,
+        'unread_chats': unread_chats,
+        'unread_chat_threads': unread_chat_thread_count(request.user),
+        'latest': {
+            'id': latest.id,
+            'title': latest.title,
+            'body': latest.body,
+            'url': latest.url,
+        } if latest else None,
+    })
 
 
 @login_required

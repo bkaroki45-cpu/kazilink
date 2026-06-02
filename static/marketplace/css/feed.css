@@ -133,6 +133,8 @@
     color: var(--feed-green);
     font-size: 0.76rem;
     font-weight: 900;
+    padding: 0 8px;
+    white-space: nowrap;
 }
 
 .feed-column {
@@ -235,6 +237,26 @@
     border-left: 5px solid rgba(22, 196, 127, 0.55);
     position: relative;
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.feed-card.is-taken {
+    border-left-color: #dc2626;
+    background: linear-gradient(90deg, #fff1f2 0%, #ffffff 34%);
+    box-shadow: 0 20px 60px rgba(127, 29, 29, 0.12);
+}
+
+.taken-ribbon {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 7px 13px;
+    border-radius: 10px;
+    background: #dc2626;
+    color: white;
+    font-size: 1rem;
+    font-weight: 950;
+    text-transform: uppercase;
+    box-shadow: 0 12px 26px rgba(220, 38, 38, 0.26);
 }
 
 .feed-card::after {
@@ -378,8 +400,8 @@
 
 .actions {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 2px;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 8px;
     padding: 8px 12px 12px;
     border-top: 1px solid var(--feed-line);
 }
@@ -398,12 +420,49 @@
     gap: 6px;
     border: 0;
     border-radius: 14px;
-    background: transparent;
+    background: #f6fbf8;
     color: #33443b;
     font-size: 0.84rem;
     font-weight: 850;
     cursor: pointer;
     transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.actions .post-action {
+    min-height: 44px;
+    border: 1px solid rgba(22, 163, 74, 0.14);
+    background: white;
+    color: #078246;
+    font-size: 0.9rem;
+}
+
+.actions .post-action:first-child {
+    background: #078246;
+    color: white;
+}
+
+.attachment-actions {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    padding: 14px 16px 16px;
+}
+
+.attachment-actions .attachment-action-btn {
+    width: 100%;
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,196,106,0.22);
+    background: #ffffff;
+    color: var(--green-dark);
+    box-shadow: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.attachment-actions .attachment-action-btn:hover {
+    background: var(--mint);
+    border-color: var(--green);
+    color: var(--green-dark);
 }
 
 .actions strong { font: inherit; }
@@ -726,7 +785,7 @@
     }
 
     .actions {
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 8px;
     }
 

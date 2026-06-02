@@ -1,7 +1,7 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}KaziLink Feed{% endblock %}
+{% block title %}KaziSite Feed{% endblock %}
 {% block mobile_title %}Home{% endblock %}
 {% block page_css %}<link rel="stylesheet" href="{% static 'marketplace/css/feed.css' %}">{% endblock %}
 
@@ -28,9 +28,10 @@
 
         <nav class="quick-links">
             <a href="{% url 'post_job' %}"><span>Job</span>Post a job</a>
+            <a href="{% url 'attachments' %}"><span>Attachment</span>Attachments</a>
             <a href="{% url 'find_jobs' %}?nearby=1"><span>Near</span>Nearby jobs</a>
             <a href="{% url 'notifications' %}"><span>{{ alert_match_count|default:0 }}</span>Job alerts</a>
-            <a href="{% url 'inbox' %}"><span>Msg</span>Messages</a>
+            <a href="{% url 'inbox' %}"><span>Inbox</span>Messages</a>
         </nav>
     </aside>
 
@@ -54,19 +55,23 @@
             </span>
             <a class="composer-input" href="{% url 'post_job' %}">What work are you posting today?</a>
             <div class="composer-actions">
-                <a href="{% url 'post_job' %}">Location</a>
-                <a href="{% url 'post_job' %}">Photo</a>
+                <a href="{% url 'attachments' %}">Attachments</a>
+                <a href="{% url 'post_attachment' %}">Internship</a>
                 <a href="{% url 'post_job' %}">Budget</a>
                 <a class="composer-post" href="{% url 'post_job' %}">Post Job</a>
             </div>
         </section>
 
-        {% for job in page_obj %}
-            {% include 'marketplace/partials/job_card.html' with job=job saved_ids=saved_ids liked_ids=liked_ids %}
+        {% for post in page_obj %}
+            {% if post.feed_type == 'attachment' %}
+                {% include 'marketplace/partials/attachment_card.html' with attachment=post %}
+            {% else %}
+                {% include 'marketplace/partials/job_card.html' with job=post saved_ids=saved_ids liked_ids=liked_ids %}
+            {% endif %}
         {% empty %}
             <article class="empty-state">
-                <h2>No open jobs yet.</h2>
-                <p>Employers can post the first opportunity from the Post Job page.</p>
+                <h2>No posts yet.</h2>
+                <p>Post a job or attachment opportunity to start the marketplace feed.</p>
                 <a class="hero-cta" href="{% url 'post_job' %}">Post a job</a>
             </article>
         {% endfor %}

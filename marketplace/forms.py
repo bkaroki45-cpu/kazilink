@@ -1,9 +1,9 @@
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+from django.contrib.auth.forms import AuthenticationForm, SetPasswordForm, UserCreationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 
-from .models import ActivityUpdate, Application, Comment, Job, JobAlert, Message, Profile, Review
+from .models import ActivityUpdate, Application, AttachmentPost, Comment, Job, JobAlert, JobReview, Message, Profile, Review
 
 
 class RegisterForm(UserCreationForm):
@@ -31,6 +31,28 @@ class LoginForm(AuthenticationForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'placeholder': 'Password'}))
 
 
+class PasswordResetEmailForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={'placeholder': 'Registered email address'}))
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].lower()
+        if not User.objects.filter(email__iexact=email).exists():
+            raise ValidationError('No account uses this email address.')
+        return email
+
+
+class PasswordResetOTPForm(forms.Form):
+    code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={'placeholder': '6-digit OTP', 'inputmode': 'numeric'}),
+    )
+
+
+class PasswordResetNewPasswordForm(SetPasswordForm):
+    pass
+
+
 class JobForm(forms.ModelForm):
     class Meta:
         model = Job
@@ -48,6 +70,30 @@ class JobForm(forms.ModelForm):
                 'data-location-search': '1',
                 'placeholder': 'Search institution, road, hospital, ward, town...',
             }),
+        }
+
+
+class AttachmentPostForm(forms.ModelForm):
+    class Meta:
+        model = AttachmentPost
+        fields = [
+            'title', 'description', 'opportunity_type', 'organization', 'location',
+            'deadline', 'required_skills', 'photo', 'document', 'contact_information',
+        ]
+        widgets = {
+            'deadline': forms.DateInput(attrs={'type': 'date'}),
+            'description': forms.Textarea(attrs={'rows': 5}),
+            'location': forms.TextInput(attrs={'placeholder': 'Town, campus, company, or county'}),
+        }
+
+
+class JobReviewForm(forms.ModelForm):
+    class Meta:
+        model = JobReview
+        fields = ['rating', 'body', 'positive']
+        widgets = {
+            'rating': forms.NumberInput(attrs={'min': 1, 'max': 5}),
+            'body': forms.Textarea(attrs={'rows': 4}),
         }
 
 

@@ -1,0 +1,60 @@
+<article class="feed-card reveal-card attachment-card {% if attachment.is_taken %}is-taken{% endif %}">
+    <header class="card-head">
+        <a class="avatar mini-avatar" href="{% url 'profile_detail' attachment.poster.username %}">
+            {% if attachment.poster.profile.avatar %}
+                <img src="{{ attachment.poster.profile.avatar.url }}" alt="{{ attachment.poster.username }}">
+            {% else %}
+                {{ attachment.poster.username|first|upper }}
+            {% endif %}
+        </a>
+        <div class="card-author">
+            <a class="author" href="{% url 'profile_detail' attachment.poster.username %}">
+                {{ attachment.poster.username }}
+                {% if attachment.poster.profile.verified %}<span class="verified">Verified</span>{% endif %}
+            </a>
+            <small>{{ attachment.created_at|timesince }} ago - {{ attachment.location }}</small>
+        </div>
+        <span class="card-menu" aria-hidden="true">{{ attachment.get_opportunity_type_display }}</span>
+    </header>
+
+    <div class="job-body">
+        <div class="job-kicker">
+            <span class="tag">{{ attachment.get_opportunity_type_display }}</span>
+            {% if attachment.organization %}<span class="category-chip">{{ attachment.organization }}</span>{% endif %}
+            {% if attachment.is_taken %}
+                <span class="taken-ribbon">Taken</span>
+            {% endif %}
+        </div>
+        <h2><a href="{{ attachment.get_absolute_url }}">{{ attachment.title }}</a></h2>
+        <p>{{ attachment.description|truncatewords:34 }} <a class="read-more" href="{{ attachment.get_absolute_url }}">Read more</a></p>
+        <div class="meta-row">
+            <span>{{ attachment.location }}</span>
+            <span>{{ attachment.required_skills|default:'Student friendly' }}</span>
+            {% if attachment.deadline %}<span>Deadline {{ attachment.deadline }}</span>{% endif %}
+        </div>
+    </div>
+
+    {% if attachment.photo %}
+        <img class="job-media" src="{{ attachment.photo.url }}" alt="{{ attachment.title }}" data-lightbox-src="{{ attachment.photo.url }}" data-lightbox-type="image">
+    {% endif %}
+
+    <footer class="actions attachment-actions">
+        <a class="btn mini attachment-action-btn" href="{{ attachment.get_absolute_url }}" title="View" aria-label="View attachment or internship">
+            View
+        </a>
+        {% if user != attachment.poster %}
+            <a class="btn mini attachment-action-btn" href="{% url 'start_conversation' attachment.poster.username %}" title="Message" aria-label="Message {{ attachment.poster.username }}">
+                Message
+            </a>
+        {% else %}
+            <a class="btn mini attachment-action-btn" href="{% url 'inbox' %}" title="Inbox" aria-label="Open inbox">
+                Inbox
+            </a>
+        {% endif %}
+        {% if attachment.document %}
+            <a class="btn mini attachment-action-btn" href="{{ attachment.document.url }}" title="Document" aria-label="Download document">
+                File
+            </a>
+        {% endif %}
+    </footer>
+</article>

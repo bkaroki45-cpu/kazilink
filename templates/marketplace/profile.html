@@ -1,7 +1,7 @@
 {% extends 'marketplace/base.html' %}
 {% load static %}
 
-{% block title %}{{ profile_user.username }} | KaziLink{% endblock %}
+{% block title %}{{ profile_user.username }} | KaziSite{% endblock %}
 
 {% block page_css %}
 <link rel="stylesheet" href="{% static 'marketplace/css/profile.css' %}">
@@ -35,7 +35,7 @@
                         {% endif %}
                     </h1>
                     <p class="bio">
-                        {{ profile_user.profile.bio|default:'KaziLink member building work opportunities across Kenya.' }}
+                        {{ profile_user.profile.bio|default:'KaziSite member building work opportunities across Kenya.' }}
                     </p>
                 </div>
             </div>

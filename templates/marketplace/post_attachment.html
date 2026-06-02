@@ -1,0 +1,61 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+
+{% block title %}Post Attachment / Internship | KaziSite{% endblock %}
+{% block mobile_title %}Attachment{% endblock %}
+
+{% block page_css %}
+<link rel="stylesheet" href="{% static 'marketplace/css/post_job.css' %}">
+{% endblock %}
+
+{% block content %}
+<main class="job-page">
+    <header class="page-header">
+        <div>
+            <h1>Post Attachment / Internship</h1>
+            <p>Share attachment and internship opportunities students can view and chat about.</p>
+        </div>
+    </header>
+
+    <section class="job-grid">
+        <aside class="info-panel">
+            <div><h2>Student Opportunities</h2></div>
+            <div class="info-card">
+                <h3>Clear role</h3>
+                <p>Tell students the department, skills, deadline, and how to reach the organization.</p>
+            </div>
+            <div class="info-card">
+                <h3>Useful files</h3>
+                <p>Add a poster or document if the opportunity has requirements or an application guide.</p>
+            </div>
+            <div class="info-card">
+                <h3>Direct chat</h3>
+                <p>Students can open the post and message you from the attachment page.</p>
+            </div>
+        </aside>
+
+        <section class="form-panel">
+            <form class="job-form" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-title">
+                    <h2>Create Attachment / Internship</h2>
+                    <p>Fill in the details so students can decide quickly.</p>
+                </div>
+
+                <div class="form-body">
+                    {% for field in form %}
+                        <div class="field {% if field.name == 'description' %}full{% endif %}">
+                            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+                            {% if field.errors %}<div class="error">{{ field.errors }}</div>{% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button class="submit-btn" type="submit">Publish Attachment / Internship</button>
+            </form>
+        </section>
+    </section>
+</main>
+{% endblock %}

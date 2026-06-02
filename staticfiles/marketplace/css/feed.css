@@ -406,6 +406,43 @@
     transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
+.actions .post-action {
+    min-height: 44px;
+    border: 1px solid rgba(22, 163, 74, 0.14);
+    background: white;
+    color: #078246;
+    font-size: 0.9rem;
+}
+
+.actions .post-action:first-child {
+    background: #078246;
+    color: white;
+}
+
+.attachment-actions {
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+    padding: 14px 16px 16px;
+}
+
+.attachment-actions .attachment-action-btn {
+    width: 100%;
+    min-height: 42px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,196,106,0.22);
+    background: #ffffff;
+    color: var(--green-dark);
+    box-shadow: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.attachment-actions .attachment-action-btn:hover {
+    background: var(--mint);
+    border-color: var(--green);
+    color: var(--green-dark);
+}
+
 .actions strong { font: inherit; }
 
 .actions .action-icon {

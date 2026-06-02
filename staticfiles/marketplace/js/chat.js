@@ -61,6 +61,8 @@ function renderMessage(message) {
             const image = document.createElement('img');
             image.src = message.image;
             image.alt = 'Chat image';
+            image.dataset.lightboxSrc = message.image;
+            image.dataset.lightboxType = 'image';
             bubble.appendChild(image);
         }
         if (message.voice_note) {
@@ -68,12 +70,43 @@ function renderMessage(message) {
             audio.controls = true;
             audio.src = message.voice_note;
             bubble.appendChild(audio);
+
+            const voiceLink = document.createElement('a');
+            voiceLink.className = 'file-link';
+            voiceLink.href = message.voice_note;
+            voiceLink.download = '';
+            voiceLink.textContent = 'Audio - Download';
+            bubble.appendChild(voiceLink);
         }
         if (message.attachment) {
+            if (message.attachment_kind === 'image') {
+                const image = document.createElement('img');
+                image.src = message.attachment;
+                image.alt = message.attachment_name || 'Chat image';
+                image.dataset.lightboxSrc = message.attachment;
+                image.dataset.lightboxType = 'image';
+                bubble.appendChild(image);
+            } else if (message.attachment_kind === 'video') {
+                const video = document.createElement('video');
+                video.className = 'chat-video';
+                video.controls = true;
+                video.src = message.attachment;
+                video.dataset.lightboxSrc = message.attachment;
+                video.dataset.lightboxType = 'video';
+                bubble.appendChild(video);
+            } else if (message.attachment_kind === 'audio') {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = message.attachment;
+                bubble.appendChild(audio);
+            }
             const link = document.createElement('a');
             link.className = 'file-link';
             link.href = message.attachment;
-            link.textContent = 'Download file';
+            link.download = '';
+            const kind = message.attachment_kind || 'file';
+            const label = kind.charAt(0).toUpperCase() + kind.slice(1);
+            link.textContent = `${label} - ${message.attachment_name || 'Download attachment'}`;
             bubble.appendChild(link);
         }
     }
@@ -84,7 +117,6 @@ function renderMessage(message) {
 }
 
 function syncMessages(messages) {
-    const indicator = pane.querySelector('[data-typing-indicator]');
     const known = new Set([...pane.querySelectorAll('[data-message-id]')].map((item) => item.dataset.messageId));
 
     messages.forEach((message) => {
@@ -97,7 +129,7 @@ function syncMessages(messages) {
             return;
         }
         if (known.has(String(message.id))) return;
-        pane.insertBefore(renderMessage(message), indicator);
+        pane.appendChild(renderMessage(message));
         pane.scrollTop = pane.scrollHeight;
     });
 }
@@ -107,11 +139,6 @@ async function pollMessages() {
     if (!response.ok) return;
     const data = await response.json();
     syncMessages(data.messages || []);
-
-    const status = document.querySelector('[data-typing-status]');
-    const indicator = pane.querySelector('[data-typing-indicator]');
-    if (status) status.textContent = data.typing ? 'Typing...' : 'Online now';
-    if (indicator) indicator.hidden = !data.typing;
 }
 
 if (pane) {
@@ -149,30 +176,6 @@ document.addEventListener('submit', async (event) => {
     }
     await pollMessages();
 });
-
-const messageInput = document.querySelector('.message-box textarea[name="body"], .message-box input[name="body"]');
-let typingTimer;
-async function sendTyping(isTyping) {
-    if (!pane?.dataset.typingUrl) return;
-    const formData = new FormData();
-    formData.append('typing', isTyping ? '1' : '0');
-    await fetch(pane.dataset.typingUrl, {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-CSRFToken': csrfToken },
-    });
-}
-
-if (messageInput) {
-    messageInput.addEventListener('input', () => {
-        sendTyping(Boolean(messageInput.value.trim())).catch(() => {});
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => sendTyping(false).catch(() => {}), 1800);
-    });
-    messageInput.closest('form')?.addEventListener('submit', () => {
-        sendTyping(false).catch(() => {});
-    });
-}
 
 const attachmentPicker = document.querySelector('[data-attachment-picker]');
 const attachmentToggle = document.querySelector('[data-attachment-toggle]');

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token }}">
 
-    <title>{% block title %}KaziLink{% endblock %}</title>
+    <title>{% block title %}KaziSite{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -29,11 +29,11 @@
         <!-- Brand -->
         <a class="brand" href="{% if user.is_authenticated %}{% url 'feed' %}{% else %}{% url 'landing' %}{% endif %}">
             <span class="brand-mark">K</span>
-            <span class="brand-name">KaziLink</span>
+            <span class="brand-name">KaziSite</span>
         </a>
 
         <!-- Mobile centred title (each page overrides via block) -->
-        <strong class="mobile-page-title">{% block mobile_title %}KaziLink{% endblock %}</strong>
+        <strong class="mobile-page-title">{% block mobile_title %}KaziSite{% endblock %}</strong>
 
         <!-- Hamburger -->
         <button class="nav-toggle" data-nav-toggle aria-label="Toggle navigation" aria-expanded="false" aria-controls="main-nav">
@@ -55,12 +55,13 @@
                     </span>
                     <div>
                         <strong>{{ user.username }}</strong>
-                        <small>{{ user.profile.get_role_display|default:'KaziLink member' }}</small>
+                        <small>{{ user.profile.get_role_display|default:'KaziSite member' }}</small>
                     </div>
                 </div>
 
                 <a href="{% url 'feed' %}">Home</a>
                 <a href="{% url 'find_jobs' %}">Jobs</a>
+                <a href="{% url 'attachments' %}">Attachments</a>
                 <a href="{% url 'post_job' %}">Post Job</a>
                 <a href="{% url 'inbox' %}">Messages</a>
                 <a href="{% url 'notifications' %}" class="nav-alert">
@@ -138,14 +139,31 @@
                 <path d="M8 12h8"/>
                 <path d="M8 16h5"/>
             </svg>
-            <span>Post Job</span>
+            <span>Post Jobs</span>
         </a>
 
-        <a href="{% url 'inbox' %}" data-nav-path="inbox">
-            <!-- Chat icon -->
+        <a href="{% url 'attachments' %}" data-nav-path="attachments">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <path d="M14 2v6h6"/>
+                <path d="M8 13h8"/>
+                <path d="M8 17h5"/>
             </svg>
+            <span>Internships</span>
+        </a>
+
+        <a class="bottom-chat-link" href="{% url 'inbox' %}" data-nav-path="inbox">
+            <!-- Chat icon -->
+            <span class="bottom-icon-wrap">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                {% if unread_chat_count %}
+                    <span class="bottom-badge" data-chat-badge>{{ unread_chat_count }}</span>
+                {% else %}
+                    <span class="bottom-badge" data-chat-badge hidden>0</span>
+                {% endif %}
+            </span>
             <span>Chat</span>
         </a>
 
@@ -175,9 +193,16 @@
         {% block content %}{% endblock %}
     </main>
 
+    <div class="media-viewer" data-media-viewer hidden>
+        <button class="media-viewer-close" type="button" data-media-close aria-label="Close media">&times;</button>
+        <button class="media-viewer-zoom" type="button" data-media-zoom aria-label="Zoom media">Zoom</button>
+        <div class="media-viewer-stage" data-media-stage></div>
+        <a class="media-viewer-download" data-media-download href="#" download>Download</a>
+    </div>
+
 </div><!-- /.app -->
 
-<script src="{% static 'marketplace/js/main.js' %}"></script>
+<script src="{% static 'marketplace/js/main.js' %}?v=chat-badge-3"></script>
 
 {% block page_js %}{% endblock %}
 </body>
