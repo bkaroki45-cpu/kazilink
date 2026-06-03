@@ -42,16 +42,19 @@
     {% endif %}
 
     <footer class="actions">
-        <a class="post-action" href="{{ job.get_absolute_url }}" title="View" aria-label="View job">
-            <strong>View</strong>
+        <a class="btn mini" href="{{ job.get_absolute_url }}" title="View" aria-label="View job">
+            View
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
         </a>
         {% if user != job.employer %}
-            <a class="post-action" href="{% url 'start_conversation' job.employer.username %}" title="Message" aria-label="Message {{ job.employer.username }}">
-                <strong>Message</strong>
+            <a class="btn mini" href="{% url 'start_conversation' job.employer.username %}" title="Message" aria-label="Message {{ job.employer.username }}">
+                Message
             </a>
         {% else %}
-            <a class="post-action" href="{% url 'inbox' %}" title="Inbox" aria-label="Open inbox">
-                <strong>Inbox</strong>
+            <a class="btn mini" href="{% url 'inbox' %}" title="Inbox" aria-label="Open inbox">
+                Inbox
             </a>
         {% endif %}
     </footer>

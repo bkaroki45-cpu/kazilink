@@ -399,8 +399,10 @@
 }
 
 .actions {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
     gap: 8px;
     padding: 8px 12px 12px;
     border-top: 1px solid var(--feed-line);
@@ -428,17 +430,17 @@
     transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
 }
 
-.actions .post-action {
-    min-height: 44px;
-    border: 1px solid rgba(22, 163, 74, 0.14);
+.actions .btn.mini {
+    min-height: 36px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(0,196,106,0.22);
     background: white;
-    color: #078246;
-    font-size: 0.9rem;
-}
-
-.actions .post-action:first-child {
-    background: #078246;
-    color: white;
+    color: var(--green-dark);
+    box-shadow: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .attachment-actions {
@@ -519,6 +521,12 @@
     transform: translateY(-1px);
     background: var(--feed-mint);
     color: var(--feed-green);
+}
+
+.actions .btn.mini:hover {
+    background: var(--mint);
+    border-color: var(--green);
+    color: var(--green-dark);
 }
 
 .actions > span:not(.action-icon) {
@@ -785,8 +793,11 @@
     }
 
     .actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
         padding: 8px;
+    }
+
+    .actions .btn.mini {
+        flex: 1;
     }
 
     .actions a,
