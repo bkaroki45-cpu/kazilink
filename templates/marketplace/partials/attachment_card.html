@@ -41,6 +41,9 @@
     <footer class="actions attachment-actions">
         <a class="btn mini attachment-action-btn" href="{{ attachment.get_absolute_url }}" title="View" aria-label="View attachment or internship">
             View
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+            </svg>
         </a>
         {% if user != attachment.poster %}
             <a class="btn mini attachment-action-btn" href="{% url 'start_conversation' attachment.poster.username %}" title="Message" aria-label="Message {{ attachment.poster.username }}">
