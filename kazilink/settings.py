@@ -55,6 +55,10 @@ CSRF_TRUSTED_ORIGINS = [
 # APPLICATIONS
 # ==========================
 
+USE_CLOUDINARY_MEDIA = bool(os.environ.get("CLOUDINARY_URL")) or (
+    os.environ.get("USE_CLOUDINARY_MEDIA", "False") == "True"
+)
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -65,6 +69,12 @@ INSTALLED_APPS = [
 
     'marketplace',
 ]
+
+if USE_CLOUDINARY_MEDIA:
+    INSTALLED_APPS += [
+        'cloudinary',
+        'cloudinary_storage',
+    ]
 
 
 # ==========================
@@ -159,6 +169,12 @@ STATICFILES_STORAGE = (
     'whitenoise.storage.CompressedManifestStaticFilesStorage'
 )
 
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+
 
 # ==========================
 # MEDIA FILES
@@ -166,6 +182,18 @@ STATICFILES_STORAGE = (
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+if USE_CLOUDINARY_MEDIA:
+    CLOUDINARY_STORAGE = {
+        'CLOUDINARY_URL': os.environ.get('CLOUDINARY_URL', ''),
+    }
+    STORAGES['default'] = {
+        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    }
+else:
+    STORAGES['default'] = {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    }
 
 
 # ==========================

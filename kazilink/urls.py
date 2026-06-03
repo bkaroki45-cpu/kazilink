@@ -25,9 +25,9 @@ urlpatterns = [
     path('', include('marketplace.urls')),
 ]
 
-if settings.DEBUG:
+if settings.DEBUG and not settings.USE_CLOUDINARY_MEDIA:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-else:
+elif not settings.USE_CLOUDINARY_MEDIA:
     urlpatterns += [
         re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
     ]
